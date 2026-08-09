@@ -6,7 +6,7 @@
 > was tried and abandoned. If it grows past ~150 lines, prune finished
 > phases down to one line each (see Section 5).
 
-Last updated: `<YYYY-MM-DD>` by `<agent/session note, optional>`
+Last updated: `2026-08-08` by `Antigravity (NestJS Project Init & Strict Mode)`
 
 ---
 
@@ -14,7 +14,7 @@ Last updated: `<YYYY-MM-DD>` by `<agent/session note, optional>`
 
 Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 
-- [ ] **Phase 1** — Project Foundation & Database Setup
+- [~] **Phase 1** — Project Foundation & Database Setup
 - [ ] **Phase 2** — Authentication & Profile Module
 - [ ] **Phase 3** — Room Lifecycle & RBAC Module
 - [ ] **Phase 4** — Treasury Pool & Contribution Workflow
@@ -30,9 +30,9 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 
 ## 2. Current Focus
 
-**Active phase:** _(e.g. Phase 4)_
-**Doing right now:** _(e.g. "Implementing PATCH /reimbursements/:id/pay — strict mode balance check done, DEBIT ledger write not yet wired")_
-**Blocked by:** _(none / describe)_
+**Active phase:** Phase 1
+**Doing right now:** NestJS base project scaffolded with TypeScript strict mode, `@nestjs/config`, and `src/config/` loaders. Next: Docker Compose + PostgreSQL + Prisma ORM setup.
+**Blocked by:** none
 
 ---
 
@@ -43,7 +43,7 @@ whole phase is finished — don't duplicate.
 
 | Module | Endpoints/features live | Notes |
 |---|---|---|
-| _e.g. auth_ | _register, login, refresh_ | _logout not done_ |
+| Core / Config | Base application bootstrap (`src/main.ts`, `src/app.module.ts`), config loaders (`src/config/*`) | Strict TS enabled, `api/v1` prefix, CORS configured |
 
 ---
 
@@ -53,15 +53,13 @@ Only log something here if it **differs from or adds to** what's written in
 `docs/`, or resolves an ambiguity the docs left open. If you followed the
 docs exactly, don't log it — that's the default, not news.
 
-- _e.g._: "Used `crypto.randomUUID()` for roomCode base + custom 6-char
-  alphanumeric slicer instead of a package, per no-new-deps preference."
+*(none)*
 
 ---
 
 ## 5. Known Issues / TODO Debt
 
-- _e.g._: "Concurrency test for reimbursement payout (Phase 6 roadmap item)
-  not written yet."
+- PostgreSQL container and Prisma schema setup pending (Phase 1 next steps).
 
 ---
 
@@ -69,11 +67,11 @@ docs exactly, don't log it — that's the default, not news.
 
 Things a fresh session needs to not re-discover by trial and error.
 
-- DB: _(e.g. running via docker-compose, migrated up to `<migration name>`)_
-- `.env`: _(e.g. copied from `.env.example`, no secrets changed)_
-- Seed data: _(e.g. seeded / not seeded)_
-- Last known good command to run the app: `<command>`
-- Last known good command to run tests: `<command>`
+- DB: PostgreSQL setup pending (Docker Compose)
+- `.env`: Created from `.env.example`
+- Seed data: not seeded
+- Last known good command to run the app: `npm run build` / `npm run start:dev`
+- Last known good command to run tests: `npm test`
 
 ---
 

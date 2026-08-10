@@ -8,6 +8,7 @@ import jwtConfig from './config/jwt.config';
 import swaggerConfig from './config/swagger.config';
 import throttlerConfig from './config/throttler.config';
 import { AuthModule } from './modules/auth/auth.module';
+import { PrismaModule } from './database/prisma.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AuthModule } from './modules/auth/auth.module';
         throttlerConfig,
       ],
     }),
+    PrismaModule,
     AuthModule,
   ],
   controllers: [AppController],

@@ -31,7 +31,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 2
-**Doing right now:** Implement Token Refresh (`POST /auth/refresh`) logic and Profile endpoints.
+**Doing right now:** Implement Profile endpoints (`/auth/me`, `/auth/profile`, `/auth/change-password`).
 **Blocked by:** none
 
 ---
@@ -44,7 +44,7 @@ whole phase is finished — don't duplicate.
 | Module | Endpoints/features live | Notes |
 |---|---|---|
 | Phase 1 | Base setup, DB Schema, Seed Data, Swagger, ESLint, Global Filters/Pipes | Complete. Ready for Phase 2. |
-| Auth | Base module skeleton, `bcrypt` utilities, `JwtModule` async config, `POST /auth/register`, `POST /auth/login` | JWT secrets wired via env, tests passing, register/login endpoints live |
+| Auth | Base module skeleton, `bcrypt`, `JwtModule`, `JwtAuthGuard`, `POST /auth/register`, `POST /auth/login` | JWT secrets wired via env, tests passing, register/login endpoints live, guard tested on temporary route |
 
 ---
 

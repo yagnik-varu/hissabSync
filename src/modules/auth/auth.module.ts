@@ -4,7 +4,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthController } from './controllers/auth.controller';
 import { AuthService } from './services/auth.service';
 import { UserRepository } from './repositories/user.repository';
-import { PrismaClient } from '../../../generated/prisma/client/client';
 
 @Module({
   imports: [
@@ -23,10 +22,6 @@ import { PrismaClient } from '../../../generated/prisma/client/client';
   providers: [
     AuthService,
     UserRepository,
-    {
-      provide: PrismaClient,
-      useValue: new PrismaClient({ adapter: null as any }),
-    },
   ],
   exports: [AuthService],
 })

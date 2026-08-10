@@ -1,8 +1,11 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Controller, Post, Get, Body, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from '../services/auth.service';
 import { RegisterDto } from '../dtos/register.dto';
 import { LoginDto } from '../dtos/login.dto';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
+import { CurrentUser } from '../../../common/decorators/current-user.decorator';
+import type { UserPayload } from '../../../common/types/user-payload.type';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -34,6 +37,18 @@ export class AuthController {
       success: true,
       message: 'User logged in successfully',
       data,
+    };
+  }
+
+  @Get('test-auth')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Test JWT Auth Guard' })
+  testAuth(@CurrentUser() user: UserPayload) {
+    return {
+      success: true,
+      message: 'Authenticated successfully',
+      data: { user },
     };
   }
 }

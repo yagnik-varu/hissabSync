@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { AuthService } from '../services/auth.service';
 import { RegisterDto } from '../dtos/register.dto';
 import { LoginDto } from '../dtos/login.dto';
+import { RefreshDto } from '../dtos/refresh.dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import type { UserPayload } from '../../../common/types/user-payload.type';
@@ -36,6 +37,20 @@ export class AuthController {
     return {
       success: true,
       message: 'User logged in successfully',
+      data,
+    };
+  }
+
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh Access Token' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Token refreshed successfully' })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid or expired refresh token' })
+  async refresh(@Body() refreshDto: RefreshDto) {
+    const data = await this.authService.refresh(refreshDto);
+    return {
+      success: true,
+      message: 'Token refreshed successfully',
       data,
     };
   }

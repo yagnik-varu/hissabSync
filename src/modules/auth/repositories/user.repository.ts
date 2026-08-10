@@ -22,4 +22,16 @@ export class UserRepository {
       },
     });
   }
+
+  async findRefreshTokensByUserId(userId: string) {
+    return this.prisma.refreshToken.findMany({
+      where: { userId },
+    });
+  }
+
+  async deleteRefreshToken(id: string) {
+    return this.prisma.refreshToken.delete({
+      where: { id },
+    });
+  }
 }

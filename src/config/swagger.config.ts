@@ -2,7 +2,9 @@ import { registerAs } from '@nestjs/config';
 
 export default registerAs('swagger', () => ({
   title: process.env.SWAGGER_TITLE || 'HisaabSync API',
-  description: process.env.SWAGGER_DESCRIPTION || 'HisaabSync Modular Monolith REST API Documentation',
+  description:
+    process.env.SWAGGER_DESCRIPTION ||
+    'HisaabSync Modular Monolith REST API Documentation',
   version: process.env.SWAGGER_VERSION || '1.0',
   path: process.env.SWAGGER_PATH || 'api/docs',
 }));

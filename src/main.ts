@@ -1,6 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -17,6 +18,16 @@ async function bootstrap() {
   });
 
   app.setGlobalPrefix(apiPrefix);
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('HisaabSync API')
+    .setDescription('API documentation for HisaabSync backend')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('api/docs', app, document);
 
   await app.listen(port);
   Logger.log(

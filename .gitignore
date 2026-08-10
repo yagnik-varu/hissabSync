@@ -39,3 +39,11 @@ Thumbs.db
 # Temporary / Scratch
 /tmp
 *.tsbuildinfo
+
+/generated/prisma
+
+# Prisma Skills
+.claude/skills/
+.windsurf/skills/
+.agents/skills/
+skills-lock.json

@@ -6,7 +6,7 @@
 > was tried and abandoned. If it grows past ~150 lines, prune finished
 > phases down to one line each (see Section 5).
 
-Last updated: `2026-08-08` by `Antigravity (NestJS Project Init & Strict Mode)`
+Last updated: `2026-08-10` by `Antigravity (Database Seeding)`
 
 ---
 
@@ -31,7 +31,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 1
-**Doing right now:** NestJS base project scaffolded with TypeScript strict mode, `@nestjs/config`, and `src/config/` loaders. Next: Docker Compose + PostgreSQL + Prisma ORM setup.
+**Doing right now:** Database Seed script (`prisma/seed.ts`) complete. Next: global Swagger OpenAPI docs, Global Exception Filter, and Validation Pipe.
 **Blocked by:** none
 
 ---
@@ -44,6 +44,7 @@ whole phase is finished — don't duplicate.
 | Module | Endpoints/features live | Notes |
 |---|---|---|
 | Core / Config | Base application bootstrap (`src/main.ts`, `src/app.module.ts`), config loaders (`src/config/*`) | Strict TS enabled, `api/v1` prefix, CORS configured |
+| Database | Prisma schema validated, migration applied (`20260810062013_init`), 14 tables + indexes created in Postgres, Database Seeded (`npx prisma db seed`) | Base tables and dummy data ready for downstream modules |
 
 ---
 
@@ -59,7 +60,7 @@ docs exactly, don't log it — that's the default, not news.
 
 ## 5. Known Issues / TODO Debt
 
-- PostgreSQL container and Prisma schema setup pending (Phase 1 next steps).
+*(none)*
 
 ---
 
@@ -67,9 +68,11 @@ docs exactly, don't log it — that's the default, not news.
 
 Things a fresh session needs to not re-discover by trial and error.
 
-- DB: PostgreSQL setup pending (Docker Compose)
+- DB: PostgreSQL 15+ configured via `docker/docker-compose.dev.yml`
+- DB Start Command: `docker compose -f docker/docker-compose.dev.yml up -d`
+- DB Stop Command: `docker compose -f docker/docker-compose.dev.yml down`
 - `.env`: Created from `.env.example`
-- Seed data: not seeded
+- Seed data: Seeded via `prisma/seed.ts` (3 Users, 1 Room, Categories, Initial Treasury Balance, etc.)
 - Last known good command to run the app: `npm run build` / `npm run start:dev`
 - Last known good command to run tests: `npm test`
 

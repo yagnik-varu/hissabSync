@@ -1,9 +1,11 @@
-import { Controller, Post, Get, Body, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Body, HttpCode, HttpStatus, UseGuards, Patch } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from '../services/auth.service';
 import { RegisterDto } from '../dtos/register.dto';
 import { LoginDto } from '../dtos/login.dto';
 import { RefreshDto } from '../dtos/refresh.dto';
+import { UpdateProfileDto } from '../dtos/update-profile.dto';
+import { ChangePasswordDto } from '../dtos/change-password.dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import type { UserPayload } from '../../../common/types/user-payload.type';
@@ -66,6 +68,49 @@ export class AuthController {
     return {
       success: true,
       message: 'Logged out successfully',
+      data: {},
+    };
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get Current User Profile' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'User profile retrieved successfully' })
+  async getProfile(@CurrentUser() user: UserPayload) {
+    const data = await this.authService.getProfile(user.sub);
+    return {
+      success: true,
+      message: 'Profile retrieved successfully',
+      data,
+    };
+  }
+
+  @Patch('profile')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update User Profile' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'User profile updated successfully' })
+  async updateProfile(@CurrentUser() user: UserPayload, @Body() updateProfileDto: UpdateProfileDto) {
+    const data = await this.authService.updateProfile(user.sub, updateProfileDto);
+    return {
+      success: true,
+      message: 'Profile updated successfully',
+      data,
+    };
+  }
+
+  @Patch('change-password')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Change Password' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Password changed successfully' })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid current password' })
+  async changePassword(@CurrentUser() user: UserPayload, @Body() changePasswordDto: ChangePasswordDto) {
+    await this.authService.changePassword(user.sub, changePasswordDto);
+    return {
+      success: true,
+      message: 'Password changed successfully',
       data: {},
     };
   }

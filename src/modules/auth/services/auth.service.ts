@@ -5,6 +5,8 @@ import { UserRepository } from '../repositories/user.repository';
 import { RegisterDto } from '../dtos/register.dto';
 import { LoginDto } from '../dtos/login.dto';
 import { RefreshDto } from '../dtos/refresh.dto';
+import { UpdateProfileDto } from '../dtos/update-profile.dto';
+import { ChangePasswordDto } from '../dtos/change-password.dto';
 import { hashPassword, comparePassword } from '../utils/password.util';
 
 @Injectable()
@@ -125,7 +127,54 @@ export class AuthService {
     if (matchedTokenId) {
       await this.userRepository.deleteRefreshToken(matchedTokenId);
     }
-    // If not matched, we just return success anyway (idempotent logout)
+  }
+
+  async getProfile(userId: string) {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException('AUTH_INVALID_CREDENTIALS');
+    }
+
+    return {
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      phone: user.phone,
+      profileImageUrl: user.profileImageUrl,
+      isActive: user.isActive,
+      createdAt: user.createdAt,
+    };
+  }
+
+  async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
+    const updatedUser = await this.userRepository.updateProfile(userId, {
+      fullName: updateProfileDto.fullName,
+      phone: updateProfileDto.phone,
+      profileImageUrl: updateProfileDto.profileImageUrl,
+    });
+
+    return {
+      id: updatedUser.id,
+      fullName: updatedUser.fullName,
+      email: updatedUser.email,
+      phone: updatedUser.phone,
+      profileImageUrl: updatedUser.profileImageUrl,
+    };
+  }
+
+  async changePassword(userId: string, changePasswordDto: ChangePasswordDto) {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException('AUTH_INVALID_CREDENTIALS');
+    }
+
+    const isPasswordValid = await comparePassword(changePasswordDto.currentPassword, user.passwordHash);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('AUTH_INVALID_CREDENTIALS');
+    }
+
+    const newPasswordHash = await hashPassword(changePasswordDto.newPassword);
+    await this.userRepository.updatePassword(userId, newPasswordHash);
   }
 
   private async generateTokens(userId: string, email: string) {

@@ -6,7 +6,15 @@ export class UserRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
   async findByEmail(email: string) {
-    return this.prisma.user.findUnique({ where: { email } });
+    return this.prisma.user.findUnique({
+      where: { email },
+    });
+  }
+
+  async findById(id: string) {
+    return this.prisma.user.findUnique({
+      where: { id },
+    });
   }
 
   async create(data: { fullName: string; email: string; passwordHash: string; phone?: string }) {
@@ -32,6 +40,20 @@ export class UserRepository {
   async deleteRefreshToken(id: string) {
     return this.prisma.refreshToken.delete({
       where: { id },
+    });
+  }
+
+  async updateProfile(id: string, data: { fullName?: string; phone?: string; profileImageUrl?: string }) {
+    return this.prisma.user.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async updatePassword(id: string, passwordHash: string) {
+    return this.prisma.user.update({
+      where: { id },
+      data: { passwordHash },
     });
   }
 }

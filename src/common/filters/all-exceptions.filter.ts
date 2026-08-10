@@ -7,7 +7,6 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { Prisma } from '../../../generated/prisma/client/client';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -37,12 +36,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
         message = res.message || exception.message;
         details = res.details || [];
       }
-    } else if (exception instanceof Prisma.PrismaClientKnownRequestError) {
-      if (exception.code === 'P2002') {
+    } else if (exception && typeof exception === 'object' && exception.constructor.name === 'PrismaClientKnownRequestError') {
+      const prismaError = exception as any;
+      if (prismaError.code === 'P2002') {
         status = HttpStatus.CONFLICT;
         code = 'RESOURCE_ALREADY_EXISTS';
         message = 'Unique constraint violation';
-      } else if (exception.code === 'P2025') {
+      } else if (prismaError.code === 'P2025') {
         status = HttpStatus.NOT_FOUND;
         code = 'RESOURCE_NOT_FOUND';
         message = 'Requested record does not exist';

@@ -6,7 +6,7 @@
 > was tried and abandoned. If it grows past ~150 lines, prune finished
 > phases down to one line each (see Section 5).
 
-Last updated: `2026-08-10` by `Antigravity (AuthModule Scaffold)`
+Last updated: `2026-08-10` by `Antigravity (JWT & Bcrypt)`
 
 ---
 
@@ -31,7 +31,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 2
-**Doing right now:** AuthModule skeleton scaffolded. Next: Implement User Registration (`POST /auth/register`).
+**Doing right now:** Implement Token Refresh (`POST /auth/refresh`) logic and Profile endpoints.
 **Blocked by:** none
 
 ---
@@ -44,7 +44,7 @@ whole phase is finished — don't duplicate.
 | Module | Endpoints/features live | Notes |
 |---|---|---|
 | Phase 1 | Base setup, DB Schema, Seed Data, Swagger, ESLint, Global Filters/Pipes | Complete. Ready for Phase 2. |
-| Auth | Base module skeleton (`AuthModule`, Controller, Service, `UserRepository`) | Wired into `app.module.ts`, no endpoints yet |
+| Auth | Base module skeleton, `bcrypt` utilities, `JwtModule` async config, `POST /auth/register`, `POST /auth/login` | JWT secrets wired via env, tests passing, register/login endpoints live |
 
 ---
 

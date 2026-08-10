@@ -6,7 +6,7 @@
 > was tried and abandoned. If it grows past ~150 lines, prune finished
 > phases down to one line each (see Section 5).
 
-Last updated: `2026-08-10` by `Antigravity (ESLint & Config Loaders)`
+Last updated: `2026-08-10` by `Antigravity (Global Exception Filter)`
 
 ---
 
@@ -31,7 +31,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 1
-**Doing right now:** ESLint/Prettier setup and `@nestjs/config` environments confirmed. Next: Global Exception Filter and Validation Pipe.
+**Doing right now:** Global `AllExceptionsFilter` added. Next: Validation Pipe (final step of Phase 1).
 **Blocked by:** none
 
 ---
@@ -43,7 +43,7 @@ whole phase is finished — don't duplicate.
 
 | Module | Endpoints/features live | Notes |
 |---|---|---|
-| Core / Config | Base app bootstrap, `@nestjs/config` loaders (`src/config/*`), global Swagger OpenAPI at `/api/docs` | Strict TS, strict ESLint (no explicit any), `api/v1` prefix, CORS configured |
+| Core / Config | Base app bootstrap, config loaders, global Swagger, global `AllExceptionsFilter` | Strict TS, strict ESLint, standard JSON error format (`src/common/filters`) |
 | Database | Prisma schema validated, migration applied (`20260810062013_init`), 14 tables + indexes created in Postgres, Database Seeded (`npx prisma db seed`) | Base tables and dummy data ready for downstream modules |
 
 ---

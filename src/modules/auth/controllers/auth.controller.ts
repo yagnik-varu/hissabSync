@@ -55,6 +55,21 @@ export class AuthController {
     };
   }
 
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Logout User' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'User logged out successfully' })
+  async logout(@CurrentUser() user: UserPayload, @Body() refreshDto: RefreshDto) {
+    await this.authService.logout(user.sub, refreshDto.refreshToken);
+    return {
+      success: true,
+      message: 'Logged out successfully',
+      data: {},
+    };
+  }
+
   @Get('test-auth')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

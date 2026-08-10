@@ -110,6 +110,24 @@ export class AuthService {
     }
   }
 
+  async logout(userId: string, refreshToken: string) {
+    const storedTokens = await this.userRepository.findRefreshTokensByUserId(userId);
+    
+    let matchedTokenId: string | null = null;
+    for (const token of storedTokens) {
+      const isMatch = await comparePassword(refreshToken, token.tokenHash);
+      if (isMatch) {
+        matchedTokenId = token.id;
+        break;
+      }
+    }
+
+    if (matchedTokenId) {
+      await this.userRepository.deleteRefreshToken(matchedTokenId);
+    }
+    // If not matched, we just return success anyway (idempotent logout)
+  }
+
   private async generateTokens(userId: string, email: string) {
     const payload = { sub: userId, email };
 

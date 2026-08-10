@@ -44,7 +44,7 @@ whole phase is finished — don't duplicate.
 | Module | Endpoints/features live | Notes |
 |---|---|---|
 | Phase 1 | Base setup, DB Schema, Seed Data, Swagger, ESLint, Global Filters/Pipes | Complete. Ready for Phase 2. |
-| Auth | Base module skeleton, `bcrypt`, `JwtModule`, `JwtAuthGuard`, `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh` | JWT secrets wired via env, tests passing, register/login endpoints live, guard tested, token rotation implemented |
+| Auth | Base module skeleton, `bcrypt`, `JwtModule`, `JwtAuthGuard`, `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout` | JWT secrets wired via env, tests passing, register/login endpoints live, guard tested, token rotation implemented, logout implemented |
 
 ---
 

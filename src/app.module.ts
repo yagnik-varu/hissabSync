@@ -7,6 +7,7 @@ import databaseConfig from './config/database.config';
 import jwtConfig from './config/jwt.config';
 import swaggerConfig from './config/swagger.config';
 import throttlerConfig from './config/throttler.config';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import throttlerConfig from './config/throttler.config';
         throttlerConfig,
       ],
     }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

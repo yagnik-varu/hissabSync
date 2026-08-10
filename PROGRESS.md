@@ -6,7 +6,7 @@
 > was tried and abandoned. If it grows past ~150 lines, prune finished
 > phases down to one line each (see Section 5).
 
-Last updated: `2026-08-10` by `Antigravity (Global Exception Filter)`
+Last updated: `2026-08-10` by `Antigravity (AuthModule Scaffold)`
 
 ---
 
@@ -14,7 +14,7 @@ Last updated: `2026-08-10` by `Antigravity (Global Exception Filter)`
 
 Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 
-- [~] **Phase 1** — Project Foundation & Database Setup
+- [x] **Phase 1** — Project Foundation & Database Setup
 - [ ] **Phase 2** — Authentication & Profile Module
 - [ ] **Phase 3** — Room Lifecycle & RBAC Module
 - [ ] **Phase 4** — Treasury Pool & Contribution Workflow
@@ -30,8 +30,8 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 
 ## 2. Current Focus
 
-**Active phase:** Phase 1
-**Doing right now:** Global `AllExceptionsFilter` added. Next: Validation Pipe (final step of Phase 1).
+**Active phase:** Phase 2
+**Doing right now:** AuthModule skeleton scaffolded. Next: Implement User Registration (`POST /auth/register`).
 **Blocked by:** none
 
 ---
@@ -43,8 +43,8 @@ whole phase is finished — don't duplicate.
 
 | Module | Endpoints/features live | Notes |
 |---|---|---|
-| Core / Config | Base app bootstrap, config loaders, global Swagger, global `AllExceptionsFilter` | Strict TS, strict ESLint, standard JSON error format (`src/common/filters`) |
-| Database | Prisma schema validated, migration applied (`20260810062013_init`), 14 tables + indexes created in Postgres, Database Seeded (`npx prisma db seed`) | Base tables and dummy data ready for downstream modules |
+| Phase 1 | Base setup, DB Schema, Seed Data, Swagger, ESLint, Global Filters/Pipes | Complete. Ready for Phase 2. |
+| Auth | Base module skeleton (`AuthModule`, Controller, Service, `UserRepository`) | Wired into `app.module.ts`, no endpoints yet |
 
 ---
 

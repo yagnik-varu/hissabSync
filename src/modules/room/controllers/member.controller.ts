@@ -1,7 +1,12 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Body, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RoomMemberGuard } from '../../../common/guards/room-member.guard';
+import { RolesGuard } from '../../../common/guards/roles.guard';
+import { Roles } from '../../../common/decorators/roles.decorator';
+import { Role } from '../../../common/enums/role.enum';
+import { CurrentUser } from '../../../common/decorators/current-user.decorator';
+import type { UserPayload } from '../../../common/types/user-payload.type';
 import { MemberService } from '../services/member.service';
 
 /**
@@ -9,13 +14,13 @@ import { MemberService } from '../services/member.service';
  * join requests, approve/reject, role updates, leave flow.
  */
 @ApiTags('Room Members')
-@Controller('rooms/:roomId/members')
+@Controller('rooms')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RoomMemberGuard)
 export class MemberController {
   constructor(private readonly memberService: MemberService) {}
 
-  @Get()
+  @Get(':roomId/members')
+  @UseGuards(JwtAuthGuard, RoomMemberGuard)
   @ApiOperation({ summary: 'List Room Members' })
   @ApiResponse({ status: 200, description: 'Members retrieved successfully' })
   async getRoomMembers(@Param('roomId') roomId: string) {
@@ -24,6 +29,70 @@ export class MemberController {
       success: true,
       message: 'Operation successful',
       data: members,
+    };
+  }
+
+  @Post('join')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Join Room via Code' })
+  async requestJoin(
+    @CurrentUser() user: UserPayload,
+    @Body('roomCode') roomCode: string,
+  ) {
+    const request = await this.memberService.requestJoin(user.sub, roomCode);
+    return {
+      success: true,
+      message: 'Join request submitted',
+      data: request,
+    };
+  }
+
+  @Get(':roomId/join-requests')
+  @UseGuards(JwtAuthGuard, RoomMemberGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.ACCOUNTANT)
+  @ApiOperation({ summary: 'List Join Requests' })
+  async listJoinRequests(@Param('roomId') roomId: string) {
+    const requests = await this.memberService.getJoinRequests(roomId);
+    return {
+      success: true,
+      message: 'Join requests retrieved',
+      data: requests,
+    };
+  }
+
+  @Patch(':roomId/join-requests/:requestId/approve')
+  @UseGuards(JwtAuthGuard, RoomMemberGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Approve Join Request' })
+  async approveJoinRequest(
+    @Param('roomId') roomId: string,
+    @Param('requestId') requestId: string,
+    @CurrentUser() user: UserPayload,
+  ) {
+    const result = await this.memberService.approveJoinRequest(roomId, requestId, user.sub);
+    return {
+      success: true,
+      message: 'Member added to room',
+      data: result,
+    };
+  }
+
+  @Patch(':roomId/join-requests/:requestId/reject')
+  @UseGuards(JwtAuthGuard, RoomMemberGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Reject Join Request' })
+  async rejectJoinRequest(
+    @Param('roomId') roomId: string,
+    @Param('requestId') requestId: string,
+    @Body('rejectionReason') rejectionReason: string,
+    @CurrentUser() user: UserPayload,
+  ) {
+    const result = await this.memberService.rejectJoinRequest(roomId, requestId, user.sub, rejectionReason);
+    return {
+      success: true,
+      message: 'Join request rejected',
+      data: result,
     };
   }
 }

@@ -140,6 +140,12 @@ export class RoomRepository {
     });
   }
 
+  async findRoomByCode(roomCode: string) {
+    return this.prisma.room.findUnique({
+      where: { roomCode },
+    });
+  }
+
   /**
    * Atomically updates a room and its settings in a single transaction.
    */

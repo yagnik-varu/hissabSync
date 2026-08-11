@@ -31,7 +31,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 3
-**Doing right now:** Room CRUD endpoints (`GET /rooms`, `GET /rooms/:roomId`, `PATCH /rooms/:roomId`) are live with RBAC guards. Next: implement membership endpoints (POST /rooms/join, list members, change role, kick, leave requests).
+**Doing right now:** Room CRUD endpoints and `GET /rooms/:roomId/members` are live with RBAC guards. Next: implement remaining membership endpoints (POST /rooms/join, change role, kick, leave requests).
 **Blocked by:** none
 
 ---
@@ -45,7 +45,7 @@ whole phase is finished — don't duplicate.
 |---|---|---|
 | Phase 1 | Base setup, DB Schema, Seed Data, Swagger, ESLint, Global Filters/Pipes | Complete. Ready for Phase 2. |
 | Phase 2 | Authentication & Profile Module | Phase 2 done — full JWT lifecycle, `@nestjs/throttler` rate limiting, profile management, e2e and unit tests. See `src/modules/auth/`. |
-| Phase 3 (partial) | Room CRUD, event infra, shared enums, RBAC Guards | Room creation (`POST`), listing (`GET /rooms`), fetching details (`GET /rooms/:roomId`), and updating (`PATCH`). RBAC Pipeline: `RoomMemberGuard` + `RolesGuard` + `@Roles()` + `@CurrentRoom()`. Event infrastructure: `src/events/event-names.ts`, `src/events/payloads/`. TreasuryAccount + category seeding deferred to Phase 4/5. `pendingExpensesCount` and `pendingContributionsCount` are stubbed as 0. |
+| Phase 3 (partial) | Room CRUD, event infra, shared enums, RBAC Guards | Room creation (`POST`), listing (`GET /rooms`), fetching details (`GET /rooms/:roomId`), updating (`PATCH`), and listing members (`GET /rooms/:roomId/members`). RBAC Pipeline: `RoomMemberGuard` + `RolesGuard` + `@Roles()` + `@CurrentRoom()`. Event infrastructure: `src/events/event-names.ts`, `src/events/payloads/`. TreasuryAccount + category seeding deferred to Phase 4/5. `pendingExpensesCount` and `pendingContributionsCount` are stubbed as 0. |
 
 ---
 

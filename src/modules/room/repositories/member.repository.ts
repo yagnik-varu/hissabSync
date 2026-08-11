@@ -8,5 +8,25 @@ import { PrismaService } from '../../../database/prisma.service';
  */
 @Injectable()
 export class MemberRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
+
+  async findRoomMembers(roomId: string) {
+    return this.prisma.roomMember.findMany({
+      where: { roomId },
+      select: {
+        userId: true,
+        role: true,
+        status: true,
+        joinedAt: true,
+        user: {
+          select: {
+            fullName: true,
+          },
+        },
+      },
+      orderBy: {
+        joinedAt: 'asc',
+      },
+    });
+  }
 }

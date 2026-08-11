@@ -6,7 +6,7 @@
 > was tried and abandoned. If it grows past ~150 lines, prune finished
 > phases down to one line each (see Section 5).
 
-Last updated: `2026-08-11` by `Antigravity (Room scaffold)`
+Last updated: `2026-08-11` by `Antigravity (POST /rooms + events)`
 
 ---
 
@@ -31,7 +31,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 3
-**Doing right now:** RoomModule folder skeleton scaffolded (controllers, services, repositories, dto, entities, events, tests, room.module.ts). Shared enums (Role, MembershipStatus, RoomStatus) created in `common/enums/`. Module wired into `app.module.ts`. **No endpoint logic yet** — next step is implementing Room CRUD endpoints.
+**Doing right now:** `POST /rooms` endpoint is live. Event infrastructure (`src/events/`) and `@nestjs/event-emitter` installed. Next: implement remaining Room endpoints (GET /rooms, GET /rooms/:roomId, PATCH /rooms/:roomId) and membership endpoints (POST /rooms/join, etc.).
 **Blocked by:** none
 
 ---
@@ -45,7 +45,7 @@ whole phase is finished — don't duplicate.
 |---|---|---|
 | Phase 1 | Base setup, DB Schema, Seed Data, Swagger, ESLint, Global Filters/Pipes | Complete. Ready for Phase 2. |
 | Phase 2 | Authentication & Profile Module | Phase 2 done — full JWT lifecycle, `@nestjs/throttler` rate limiting, profile management, e2e and unit tests. See `src/modules/auth/`. |
-| Phase 3 (partial) | RoomModule skeleton, shared enums in `common/enums/` | Folder structure only — no endpoint logic. Controllers, services, repositories are empty shells. Enums: `Role`, `MembershipStatus`, `RoomStatus`. |
+| Phase 3 (partial) | `POST /rooms` live, event infra, shared enums | Room creation with auto roomCode gen, RoomSettings defaults, ADMIN membership, `room.created` event emission. Event infrastructure: `src/events/event-names.ts`, `src/events/payloads/`. TreasuryAccount + category seeding deferred to Phase 4/5 (will listen on `room.created`). |
 
 ---
 
@@ -56,6 +56,8 @@ Only log something here if it **differs from or adds to** what's written in
 docs exactly, don't log it — that's the default, not news.
 
 - Split Room module into two controller/service/repository pairs: `Room*` (CRUD/settings) and `Member*` (memberships/join-requests). Docs don't prescribe this split, but it follows SRP and avoids a god-service.
+- `EventEmitterModule.forRoot()` placed inside RoomModule (first module to emit events). NestJS makes this global, so future modules can just inject `EventEmitter2` without re-importing.
+- `room.created` event emitted even though no listeners exist yet — intentionally decoupled; Treasury and Category modules will subscribe later.
 
 ---
 

@@ -1,5 +1,6 @@
 import { Controller, Post, Get, Body, HttpCode, HttpStatus, UseGuards, Patch } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ThrottlerGuard, Throttle } from '@nestjs/throttler';
 import { AuthService } from '../services/auth.service';
 import { RegisterDto } from '../dtos/register.dto';
 import { LoginDto } from '../dtos/login.dto';
@@ -17,6 +18,7 @@ export class AuthController {
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
+  @UseGuards(ThrottlerGuard)
   @ApiOperation({ summary: 'Register User' })
   @ApiResponse({ status: HttpStatus.CREATED, description: 'User registered successfully' })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Validation error or email already exists' })
@@ -31,6 +33,7 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(ThrottlerGuard)
   @ApiOperation({ summary: 'Login User' })
   @ApiResponse({ status: HttpStatus.OK, description: 'User logged in successfully' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid email or password' })
@@ -45,6 +48,7 @@ export class AuthController {
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(ThrottlerGuard)
   @ApiOperation({ summary: 'Refresh Access Token' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Token refreshed successfully' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid or expired refresh token' })

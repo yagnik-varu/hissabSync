@@ -15,7 +15,7 @@ Last updated: `2026-08-10` by `Antigravity (JWT & Bcrypt)`
 Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 
 - [x] **Phase 1** — Project Foundation & Database Setup
-- [ ] **Phase 2** — Authentication & Profile Module
+- [x] **Phase 2** — Authentication & Profile Module
 - [ ] **Phase 3** — Room Lifecycle & RBAC Module
 - [ ] **Phase 4** — Treasury Pool & Contribution Workflow
 - [ ] **Phase 5** — Expense Tracking & Categories
@@ -30,8 +30,8 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 
 ## 2. Current Focus
 
-**Active phase:** Phase 2
-**Doing right now:** Implement Profile endpoints (`/auth/me`, `/auth/profile`, `/auth/change-password`).
+**Active phase:** Phase 3
+**Doing right now:** Ready to begin Phase 3 (Room Lifecycle & RBAC Module). Room module will depend on `JwtAuthGuard` from Phase 2.
 **Blocked by:** none
 
 ---
@@ -44,7 +44,7 @@ whole phase is finished — don't duplicate.
 | Module | Endpoints/features live | Notes |
 |---|---|---|
 | Phase 1 | Base setup, DB Schema, Seed Data, Swagger, ESLint, Global Filters/Pipes | Complete. Ready for Phase 2. |
-| Auth | Base module skeleton, `bcrypt`, `JwtModule`, `JwtAuthGuard`, `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`, Profile endpoints | JWT secrets wired via env, tests passing, register/login endpoints live, guard tested, token rotation implemented, logout implemented, profile updates/password changes live |
+| Phase 2 | Authentication & Profile Module | Phase 2 done — full JWT lifecycle, `@nestjs/throttler` rate limiting, profile management, e2e and unit tests. See `src/modules/auth/`. |
 
 ---
 

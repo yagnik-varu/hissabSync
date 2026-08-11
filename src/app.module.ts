@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import appConfig from './config/app.config';
@@ -20,6 +21,16 @@ import { PrismaModule } from './database/prisma.module';
         jwtConfig,
         swaggerConfig,
         throttlerConfig,
+      ],
+    }),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => [
+        {
+          ttl: config.get<number>('throttler.ttl') || 60,
+          limit: config.get<number>('throttler.limit') || 100,
+        },
       ],
     }),
     PrismaModule,

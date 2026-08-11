@@ -31,7 +31,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 3
-**Doing right now:** Room CRUD, member listing, and Join Request endpoints (`POST /rooms/join`, `GET .../join-requests`, `PATCH .../approve|reject`) are live. Next: implement remaining membership endpoints (change role, kick, leave requests).
+**Doing right now:** Room CRUD, join requests, role updates, and member removal are live. Next: implement remaining membership endpoints (leave requests).
 **Blocked by:** none
 
 ---
@@ -45,7 +45,7 @@ whole phase is finished — don't duplicate.
 |---|---|---|
 | Phase 1 | Base setup, DB Schema, Seed Data, Swagger, ESLint, Global Filters/Pipes | Complete. Ready for Phase 2. |
 | Phase 2 | Authentication & Profile Module | Phase 2 done — full JWT lifecycle, `@nestjs/throttler` rate limiting, profile management, e2e and unit tests. See `src/modules/auth/`. |
-| Phase 3 (partial) | Room CRUD, join requests, shared enums, RBAC Guards | Room creation (`POST`), listing (`GET /rooms`), fetching details (`GET /rooms/:roomId`), updating (`PATCH`), listing members (`GET /rooms/:roomId/members`), and join requests (`POST /rooms/join`, `GET /rooms/:roomId/join-requests`, `PATCH .../approve|reject`). RBAC Pipeline: `RoomMemberGuard` + `RolesGuard` + `@Roles()` + `@CurrentRoom()`. Event infrastructure: `src/events/event-names.ts`, `src/events/payloads/`. TreasuryAccount + category seeding deferred to Phase 4/5. `pendingExpensesCount` and `pendingContributionsCount` are stubbed as 0. |
+| Phase 3 (partial) | Room CRUD, join requests, member management, shared enums, RBAC Guards | Room creation (`POST`), listing (`GET /rooms`), fetching details (`GET /rooms/:roomId`), updating (`PATCH`), listing members (`GET /rooms/:roomId/members`), join requests (`POST /rooms/join`, `GET /rooms/:roomId/join-requests`, `PATCH .../approve|reject`), update member role (`PATCH /rooms/:roomId/members/:userId/role`), and kick member (`DELETE /rooms/:roomId/members/:userId`). RBAC Pipeline: `RoomMemberGuard` + `RolesGuard` + `@Roles()` + `@CurrentRoom()`. Event infrastructure: `src/events/event-names.ts`, `src/events/payloads/`. TreasuryAccount + category seeding deferred to Phase 4/5. `pendingExpensesCount` and `pendingContributionsCount` are stubbed as 0. |
 
 ---
 

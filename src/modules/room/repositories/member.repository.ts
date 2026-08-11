@@ -99,4 +99,37 @@ export class MemberRepository {
       return { joinRequest, member };
     });
   }
+
+  async getMember(roomId: string, userId: string) {
+    return this.prisma.roomMember.findUnique({
+      where: { roomId_userId: { roomId, userId } },
+    });
+  }
+
+  async countActiveAdmins(roomId: string) {
+    return this.prisma.roomMember.count({
+      where: {
+        roomId,
+        role: Role.ADMIN,
+        status: MemberStatus.ACTIVE,
+      },
+    });
+  }
+
+  async updateMemberRole(roomId: string, userId: string, role: Role) {
+    return this.prisma.roomMember.update({
+      where: { roomId_userId: { roomId, userId } },
+      data: { role },
+    });
+  }
+
+  async deactivateMember(roomId: string, userId: string) {
+    return this.prisma.roomMember.update({
+      where: { roomId_userId: { roomId, userId } },
+      data: {
+        status: MemberStatus.LEFT,
+        leftAt: new Date(),
+      },
+    });
+  }
 }

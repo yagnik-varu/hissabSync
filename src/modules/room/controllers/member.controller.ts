@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Param, Body, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RoomMemberGuard } from '../../../common/guards/room-member.guard';
@@ -92,6 +92,41 @@ export class MemberController {
     return {
       success: true,
       message: 'Join request rejected',
+      data: result,
+    };
+  }
+
+  @Patch(':roomId/members/:userId/role')
+  @UseGuards(JwtAuthGuard, RoomMemberGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Change Member Role' })
+  async updateMemberRole(
+    @Param('roomId') roomId: string,
+    @Param('userId') userId: string,
+    @Body('role') role: Role,
+    @CurrentUser() user: UserPayload,
+  ) {
+    const result = await this.memberService.updateRole(roomId, userId, role, user.sub);
+    return {
+      success: true,
+      message: 'Member role updated successfully',
+      data: result,
+    };
+  }
+
+  @Delete(':roomId/members/:userId')
+  @UseGuards(JwtAuthGuard, RoomMemberGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Remove / Kick Member' })
+  async removeMember(
+    @Param('roomId') roomId: string,
+    @Param('userId') userId: string,
+    @CurrentUser() user: UserPayload,
+  ) {
+    const result = await this.memberService.removeMember(roomId, userId, user.sub);
+    return {
+      success: true,
+      message: 'Member removed from room successfully',
       data: result,
     };
   }

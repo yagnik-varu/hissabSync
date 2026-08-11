@@ -1,10 +1,10 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { MemberRepository } from '../repositories/member.repository';
 import { RoomRepository } from '../repositories/room.repository';
 import { EventNames } from '../../../events/event-names';
-import { RoomJoinRequestedPayload, RoomMemberAddedPayload, DomainEventEnvelope } from '../../../events/payloads';
-import { JoinRequestStatus } from '../../../../generated/prisma/client/enums';
+import { RoomJoinRequestedPayload, RoomMemberAddedPayload, RoomMemberRoleChangedPayload, RoomMemberDeactivatedPayload, DomainEventEnvelope } from '../../../events/payloads';
+import { JoinRequestStatus, Role } from '../../../../generated/prisma/client/enums';
 
 /**
  * Business logic for membership and join-request flows:
@@ -119,5 +119,81 @@ export class MemberService {
   async rejectJoinRequest(roomId: string, requestId: string, adminId: string, rejectionReason?: string) {
     await this.validateJoinRequest(requestId);
     return this.memberRepository.rejectJoinRequest(requestId, adminId, rejectionReason);
+  }
+
+  async ensureSafeAdminRemoval(roomId: string, userId: string, currentAdminId: string) {
+    if (userId === currentAdminId) {
+      throw new ForbiddenException({
+        code: 'ROOM_ADMIN_CANNOT_KICK_SELF',
+        message: 'An admin cannot alter their own role or remove themselves using this endpoint.',
+      });
+    }
+
+    const member = await this.memberRepository.getMember(roomId, userId);
+    if (!member) {
+      throw new NotFoundException({
+        code: 'ROOM_MEMBER_NOT_FOUND',
+        message: 'Member does not exist in this room.',
+      });
+    }
+
+    if (member.role === Role.ADMIN) {
+      const activeAdminsCount = await this.memberRepository.countActiveAdmins(roomId);
+      if (activeAdminsCount <= 1) {
+        throw new BadRequestException({
+          code: 'ROOM_LAST_ADMIN_CANNOT_LEAVE',
+          message: 'Cannot demote or remove the last active admin of the room.',
+        });
+      }
+    }
+    return member;
+  }
+
+  async updateRole(roomId: string, userId: string, newRole: Role, adminId: string) {
+    const member = await this.ensureSafeAdminRemoval(roomId, userId, adminId);
+
+    if (member.role === newRole) {
+      return member;
+    }
+
+    const updatedMember = await this.memberRepository.updateMemberRole(roomId, userId, newRole);
+
+    this.eventEmitter.emit(EventNames.ROOM_MEMBER_ROLE_CHANGED, {
+      eventId: crypto.randomUUID(),
+      eventName: EventNames.ROOM_MEMBER_ROLE_CHANGED,
+      aggregateId: updatedMember.id,
+      roomId,
+      actorId: adminId,
+      occurredAt: new Date().toISOString(),
+      payload: {
+        roomId,
+        userId: updatedMember.userId,
+        oldRole: member.role,
+        newRole,
+      },
+    } as DomainEventEnvelope<RoomMemberRoleChangedPayload>);
+
+    return updatedMember;
+  }
+
+  async removeMember(roomId: string, userId: string, adminId: string) {
+    const member = await this.ensureSafeAdminRemoval(roomId, userId, adminId);
+
+    const deactivatedMember = await this.memberRepository.deactivateMember(roomId, userId);
+
+    this.eventEmitter.emit(EventNames.ROOM_MEMBER_DEACTIVATED, {
+      eventId: crypto.randomUUID(),
+      eventName: EventNames.ROOM_MEMBER_DEACTIVATED,
+      aggregateId: deactivatedMember.id,
+      roomId,
+      actorId: adminId,
+      occurredAt: new Date().toISOString(),
+      payload: {
+        roomId,
+        userId: deactivatedMember.userId,
+      },
+    } as DomainEventEnvelope<RoomMemberDeactivatedPayload>);
+
+    return deactivatedMember;
   }
 }

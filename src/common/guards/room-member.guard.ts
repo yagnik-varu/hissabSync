@@ -13,12 +13,12 @@ import { Request } from 'express';
 
 @Injectable()
 export class RoomMemberGuard implements CanActivate {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     const user = (request as any).user as UserPayload;
-    const roomId = request.params.roomId;
+    const roomId = request.params.roomId as string;
 
     if (!user || !user.sub) {
       return false; // JwtAuthGuard should have handled this, but just in case

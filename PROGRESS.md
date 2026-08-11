@@ -6,7 +6,7 @@
 > was tried and abandoned. If it grows past ~150 lines, prune finished
 > phases down to one line each (see Section 5).
 
-Last updated: `2026-08-10` by `Antigravity (JWT & Bcrypt)`
+Last updated: `2026-08-11` by `Antigravity (Room scaffold)`
 
 ---
 
@@ -16,7 +16,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 
 - [x] **Phase 1** — Project Foundation & Database Setup
 - [x] **Phase 2** — Authentication & Profile Module
-- [ ] **Phase 3** — Room Lifecycle & RBAC Module
+- [~] **Phase 3** — Room Lifecycle & RBAC Module
 - [ ] **Phase 4** — Treasury Pool & Contribution Workflow
 - [ ] **Phase 5** — Expense Tracking & Categories
 - [ ] **Phase 6** — Reimbursement Payout Engine
@@ -31,7 +31,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 3
-**Doing right now:** Ready to begin Phase 3 (Room Lifecycle & RBAC Module). Room module will depend on `JwtAuthGuard` from Phase 2.
+**Doing right now:** RoomModule folder skeleton scaffolded (controllers, services, repositories, dto, entities, events, tests, room.module.ts). Shared enums (Role, MembershipStatus, RoomStatus) created in `common/enums/`. Module wired into `app.module.ts`. **No endpoint logic yet** — next step is implementing Room CRUD endpoints.
 **Blocked by:** none
 
 ---
@@ -45,6 +45,7 @@ whole phase is finished — don't duplicate.
 |---|---|---|
 | Phase 1 | Base setup, DB Schema, Seed Data, Swagger, ESLint, Global Filters/Pipes | Complete. Ready for Phase 2. |
 | Phase 2 | Authentication & Profile Module | Phase 2 done — full JWT lifecycle, `@nestjs/throttler` rate limiting, profile management, e2e and unit tests. See `src/modules/auth/`. |
+| Phase 3 (partial) | RoomModule skeleton, shared enums in `common/enums/` | Folder structure only — no endpoint logic. Controllers, services, repositories are empty shells. Enums: `Role`, `MembershipStatus`, `RoomStatus`. |
 
 ---
 
@@ -54,7 +55,7 @@ Only log something here if it **differs from or adds to** what's written in
 `docs/`, or resolves an ambiguity the docs left open. If you followed the
 docs exactly, don't log it — that's the default, not news.
 
-*(none)*
+- Split Room module into two controller/service/repository pairs: `Room*` (CRUD/settings) and `Member*` (memberships/join-requests). Docs don't prescribe this split, but it follows SRP and avoids a god-service.
 
 ---
 

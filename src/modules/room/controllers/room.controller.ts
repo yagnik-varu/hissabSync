@@ -15,8 +15,15 @@ import {
 import { RoomService } from '../services/room.service';
 import { CreateRoomDto } from '../dto/create-room.dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
+import { RoomMemberGuard } from '../../../common/guards/room-member.guard';
+import { RolesGuard } from '../../../common/guards/roles.guard';
+import { Roles } from '../../../common/decorators/roles.decorator';
+import { CurrentRoom } from '../../../common/decorators/current-room.decorator';
+import { Role } from '../../../common/enums/role.enum';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import type { UserPayload } from '../../../common/types/user-payload.type';
+import type { RoomContext } from '../../../common/types/room-context.type';
+import { Param, Get } from '@nestjs/common';
 
 /**
  * Handles HTTP requests for Room lifecycle operations.
@@ -63,6 +70,30 @@ export class RoomController {
       success: true,
       message: 'Room created successfully',
       data,
+    };
+  }
+
+  /**
+   * GET /rooms/:roomId/test-rbac — Temporary route to test the RBAC guard chain.
+   * Guard pipeline: JwtAuthGuard → RoomMemberGuard → RolesGuard
+   */
+  @Get(':roomId/test-rbac')
+  @UseGuards(JwtAuthGuard, RoomMemberGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Test RBAC Guard Chain (Admin Only)' })
+  testRbac(
+    @CurrentRoom() room: RoomContext,
+    @CurrentUser() user: UserPayload,
+    @Param('roomId') roomId: string,
+  ) {
+    return {
+      success: true,
+      message: 'RBAC guard chain passed! You are an active Admin in this room.',
+      data: {
+        roomContext: room,
+        userContext: user,
+      },
     };
   }
 }

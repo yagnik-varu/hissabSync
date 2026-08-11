@@ -23,6 +23,6 @@ import { UserRepository } from './repositories/user.repository';
     AuthService,
     UserRepository,
   ],
-  exports: [AuthService],
+  exports: [AuthService, JwtModule],
 })
 export class AuthModule {}

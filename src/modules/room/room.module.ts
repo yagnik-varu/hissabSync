@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { AuthModule } from '../auth/auth.module';
 import { RoomController } from './controllers/room.controller';
 import { MemberController } from './controllers/member.controller';
 import { RoomService } from './services/room.service';
@@ -23,6 +24,7 @@ import { MemberRepository } from './repositories/member.repository';
 @Module({
   imports: [
     EventEmitterModule.forRoot(),
+    AuthModule,
   ],
   controllers: [RoomController, MemberController],
   providers: [

@@ -80,4 +80,105 @@ export class RoomRepository {
     });
     return count > 0;
   }
+
+  /**
+   * Retrieves a paginated list of rooms the user belongs to.
+   */
+  async findMyRooms(
+    userId: string,
+    params: { status?: PrismaRole | any; skip: number; take: number },
+  ) {
+    const whereCondition: any = {
+      members: {
+        some: {
+          userId,
+          status: MemberStatus.ACTIVE, // Only show rooms where user is currently active
+        },
+      },
+    };
+
+    if (params.status) {
+      whereCondition.status = params.status;
+    }
+
+    const [rooms, total] = await Promise.all([
+      this.prisma.room.findMany({
+        where: whereCondition,
+        skip: params.skip,
+        take: params.take,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          settings: true,
+          _count: {
+            select: { members: { where: { status: MemberStatus.ACTIVE } } },
+          },
+          members: {
+            where: { userId },
+            select: { role: true }, // We only need the current user's role
+          },
+        },
+      }),
+      this.prisma.room.count({ where: whereCondition }),
+    ]);
+
+    return { rooms, total };
+  }
+
+  /**
+   * Gets detailed room info.
+   */
+  async findRoomDetails(roomId: string) {
+    return this.prisma.room.findUnique({
+      where: { id: roomId },
+      include: {
+        settings: true,
+        treasuryAccount: true,
+        _count: {
+          select: { members: { where: { status: MemberStatus.ACTIVE } } },
+        },
+      },
+    });
+  }
+
+  /**
+   * Atomically updates a room and its settings in a single transaction.
+   */
+  async updateRoomAndSettings(
+    roomId: string,
+    data: {
+      name?: string;
+      description?: string;
+      allowNegativeTreasury?: boolean;
+    },
+  ) {
+    return this.prisma.$transaction(async (tx) => {
+      // 1. Update the Room table (name, description)
+      const roomUpdateData: any = {};
+      if (data.name !== undefined) roomUpdateData.name = data.name;
+      if (data.description !== undefined) roomUpdateData.description = data.description;
+
+      let room;
+      if (Object.keys(roomUpdateData).length > 0) {
+        room = await tx.room.update({
+          where: { id: roomId },
+          data: roomUpdateData,
+        });
+      } else {
+        room = await tx.room.findUniqueOrThrow({ where: { id: roomId } });
+      }
+
+      // 2. Update the RoomSettings table (allowNegativeTreasury)
+      let settings;
+      if (data.allowNegativeTreasury !== undefined) {
+        settings = await tx.roomSettings.update({
+          where: { roomId },
+          data: { allowNegativeTreasury: data.allowNegativeTreasury },
+        });
+      } else {
+        settings = await tx.roomSettings.findUniqueOrThrow({ where: { roomId } });
+      }
+
+      return { room, settings };
+    });
+  }
 }

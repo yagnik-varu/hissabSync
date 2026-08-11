@@ -23,7 +23,9 @@ import { Role } from '../../../common/enums/role.enum';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import type { UserPayload } from '../../../common/types/user-payload.type';
 import type { RoomContext } from '../../../common/types/room-context.type';
-import { Param, Get } from '@nestjs/common';
+import { Param, Get, Query, Patch } from '@nestjs/common';
+import { ListRoomsDto } from '../dto/list-rooms.dto';
+import { UpdateRoomDto } from '../dto/update-room.dto';
 
 /**
  * Handles HTTP requests for Room lifecycle operations.
@@ -74,26 +76,62 @@ export class RoomController {
   }
 
   /**
-   * GET /rooms/:roomId/test-rbac — Temporary route to test the RBAC guard chain.
-   * Guard pipeline: JwtAuthGuard → RoomMemberGuard → RolesGuard
+   * GET /rooms — List rooms the current user belongs to.
    */
-  @Get(':roomId/test-rbac')
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List my rooms' })
+  async listMyRooms(
+    @CurrentUser() user: UserPayload,
+    @Query() query: ListRoomsDto,
+  ) {
+    const result = await this.roomService.listMyRooms(user.sub, query);
+    return {
+      success: true,
+      message: 'Rooms retrieved successfully',
+      ...result, // Spreads data and meta
+    };
+  }
+
+  /**
+   * GET /rooms/:roomId — Get room details.
+   * Requires any ACTIVE member.
+   */
+  @Get(':roomId')
+  @UseGuards(JwtAuthGuard, RoomMemberGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get room details' })
+  async getRoomDetails(
+    @CurrentRoom() room: RoomContext,
+    @Param('roomId') roomId: string,
+  ) {
+    const data = await this.roomService.getRoomDetails(roomId, room.role);
+    return {
+      success: true,
+      message: 'Room details retrieved successfully',
+      data,
+    };
+  }
+
+  /**
+   * PATCH /rooms/:roomId — Update room details & settings.
+   * Requires ADMIN role.
+   */
+  @Patch(':roomId')
   @UseGuards(JwtAuthGuard, RoomMemberGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Test RBAC Guard Chain (Admin Only)' })
-  testRbac(
-    @CurrentRoom() room: RoomContext,
-    @CurrentUser() user: UserPayload,
+  @ApiOperation({ summary: 'Update room info & settings' })
+  async updateRoom(
     @Param('roomId') roomId: string,
+    @Body() updateRoomDto: UpdateRoomDto,
   ) {
+    const data = await this.roomService.updateRoom(roomId, updateRoomDto);
     return {
       success: true,
-      message: 'RBAC guard chain passed! You are an active Admin in this room.',
-      data: {
-        roomContext: room,
-        userContext: user,
-      },
+      message: 'Room updated successfully',
+      data,
     };
   }
 }

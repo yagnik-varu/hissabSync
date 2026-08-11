@@ -6,7 +6,7 @@
 > was tried and abandoned. If it grows past ~150 lines, prune finished
 > phases down to one line each (see Section 5).
 
-Last updated: `2026-08-11` by `Antigravity (RBAC Guards)`
+Last updated: `2026-08-11` by `Antigravity (Room CRUD Endpoints)`
 
 ---
 
@@ -31,7 +31,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 3
-**Doing right now:** `POST /rooms` endpoint is live, and RBAC guard pipeline (`RoomMemberGuard`, `RolesGuard`, `@Roles`, `@CurrentRoom`) is implemented and tested. Next: implement remaining Room endpoints (GET /rooms, GET /rooms/:roomId, PATCH /rooms/:roomId) and membership endpoints (POST /rooms/join, etc.).
+**Doing right now:** Room CRUD endpoints (`GET /rooms`, `GET /rooms/:roomId`, `PATCH /rooms/:roomId`) are live with RBAC guards. Next: implement membership endpoints (POST /rooms/join, list members, change role, kick, leave requests).
 **Blocked by:** none
 
 ---
@@ -45,7 +45,7 @@ whole phase is finished — don't duplicate.
 |---|---|---|
 | Phase 1 | Base setup, DB Schema, Seed Data, Swagger, ESLint, Global Filters/Pipes | Complete. Ready for Phase 2. |
 | Phase 2 | Authentication & Profile Module | Phase 2 done — full JWT lifecycle, `@nestjs/throttler` rate limiting, profile management, e2e and unit tests. See `src/modules/auth/`. |
-| Phase 3 (partial) | `POST /rooms` live, event infra, shared enums, RBAC Guards | Room creation with auto roomCode gen, RoomSettings defaults, ADMIN membership, `room.created` event emission. Event infrastructure: `src/events/event-names.ts`, `src/events/payloads/`. TreasuryAccount + category seeding deferred to Phase 4/5 (will listen on `room.created`). RBAC Pipeline: `RoomMemberGuard` + `RolesGuard` + `@Roles()` + `@CurrentRoom()`. |
+| Phase 3 (partial) | Room CRUD, event infra, shared enums, RBAC Guards | Room creation (`POST`), listing (`GET /rooms`), fetching details (`GET /rooms/:roomId`), and updating (`PATCH`). RBAC Pipeline: `RoomMemberGuard` + `RolesGuard` + `@Roles()` + `@CurrentRoom()`. Event infrastructure: `src/events/event-names.ts`, `src/events/payloads/`. TreasuryAccount + category seeding deferred to Phase 4/5. `pendingExpensesCount` and `pendingContributionsCount` are stubbed as 0. |
 
 ---
 

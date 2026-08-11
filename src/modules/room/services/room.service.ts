@@ -1,8 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { randomUUID } from 'crypto';
 import { RoomRepository } from '../repositories/room.repository';
 import { CreateRoomDto } from '../dto/create-room.dto';
+import { ListRoomsDto } from '../dto/list-rooms.dto';
+import { UpdateRoomDto } from '../dto/update-room.dto';
+import { RoomStatus } from '../../../common/enums/room-status.enum';
 import { EventNames } from '../../../events/event-names';
 import type { DomainEventEnvelope } from '../../../events/payloads/domain-event.envelope';
 import type { RoomCreatedPayload } from '../../../events/payloads/room-created.payload';
@@ -142,5 +145,103 @@ export class RoomService {
 
     // Extremely unlikely to reach here with 36^6+ combinations
     throw new Error('Failed to generate unique room code after 10 attempts');
+  }
+
+  /**
+   * Retrieves a paginated list of rooms for the given user.
+   */
+  async listMyRooms(userId: string, dto: ListRoomsDto) {
+    const skip = (dto.page - 1) * dto.limit;
+    const { rooms, total } = await this.roomRepository.findMyRooms(userId, {
+      status: dto.status,
+      skip,
+      take: dto.limit,
+    });
+
+    const totalPages = Math.ceil(total / dto.limit);
+
+    return {
+      data: rooms.map((r: any) => ({
+        id: r.id,
+        name: r.name,
+        roomCode: r.roomCode,
+        status: r.status,
+        myRole: r.members[0]?.role,
+        memberCount: r._count.members,
+        treasuryBalance: r.treasuryAccount?.currentBalance ?? '0.00',
+      })),
+      meta: {
+        page: dto.page,
+        limit: dto.limit,
+        totalItems: total,
+        totalPages,
+        hasNextPage: dto.page < totalPages,
+        hasPreviousPage: dto.page > 1,
+      },
+    };
+  }
+
+  /**
+   * Gets detailed room info. Stubbed counts for Phase 4/5.
+   */
+  async getRoomDetails(roomId: string, myRole: string) {
+    const room = await this.roomRepository.findRoomDetails(roomId);
+    if (!room) {
+      throw new NotFoundException({
+        code: 'ROOM_NOT_FOUND',
+        message: 'Room not found.',
+      });
+    }
+
+    return {
+      id: room.id,
+      name: room.name,
+      roomCode: room.roomCode,
+      myRole,
+      memberCount: room._count.members,
+      treasuryBalance: room.treasuryAccount?.currentBalance ?? '0.00',
+      // TODO (Phase 4/5): Stubbed counts since Expense/Contribution modules don't exist yet
+      pendingExpensesCount: 0,
+      pendingContributionsCount: 0,
+      settings: {
+        allowNegativeTreasury: room.settings?.allowNegativeTreasury,
+        currencyCode: room.settings?.currencyCode,
+      },
+    };
+  }
+
+  /**
+   * Updates room details and settings (Admin only).
+   */
+  async updateRoom(roomId: string, dto: UpdateRoomDto) {
+    const room = await this.roomRepository.findRoomDetails(roomId);
+    if (!room) {
+      throw new NotFoundException({
+        code: 'ROOM_NOT_FOUND',
+        message: 'Room not found.',
+      });
+    }
+
+    if (room.status === RoomStatus.ARCHIVED) {
+      throw new BadRequestException({
+        code: 'ROOM_ALREADY_ARCHIVED',
+        message: 'Cannot update an archived room.',
+      });
+    }
+
+    const { room: updatedRoom, settings } = await this.roomRepository.updateRoomAndSettings(
+      roomId,
+      dto,
+    );
+
+    return {
+      id: updatedRoom.id,
+      name: updatedRoom.name,
+      description: updatedRoom.description,
+      settings: {
+        allowNegativeTreasury: settings?.allowNegativeTreasury,
+        currencyCode: settings?.currencyCode,
+      },
+    };
   }
 }

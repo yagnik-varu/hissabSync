@@ -130,4 +130,54 @@ export class MemberController {
       data: result,
     };
   }
+
+  @Post(':roomId/leave-request')
+  @UseGuards(JwtAuthGuard, RoomMemberGuard)
+  @ApiOperation({ summary: 'Request Leave Room' })
+  async requestLeave(
+    @Param('roomId') roomId: string,
+    @CurrentUser() user: UserPayload,
+  ) {
+    const result = await this.memberService.requestLeave(roomId, user.sub);
+    return {
+      success: true,
+      message: 'Leave request submitted successfully',
+      data: result,
+    };
+  }
+
+  @Patch(':roomId/leave-requests/:requestId/approve')
+  @UseGuards(JwtAuthGuard, RoomMemberGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Approve Leave Request' })
+  async approveLeaveRequest(
+    @Param('roomId') roomId: string,
+    @Param('requestId') requestId: string,
+    @CurrentUser() user: UserPayload,
+  ) {
+    const result = await this.memberService.approveLeave(roomId, requestId, user.sub);
+    return {
+      success: true,
+      message: 'Leave request approved successfully',
+      data: result,
+    };
+  }
+
+  @Patch(':roomId/leave-requests/:requestId/reject')
+  @UseGuards(JwtAuthGuard, RoomMemberGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Reject Leave Request' })
+  async rejectLeaveRequest(
+    @Param('roomId') roomId: string,
+    @Param('requestId') requestId: string,
+    @Body('rejectionReason') rejectionReason: string,
+    @CurrentUser() user: UserPayload,
+  ) {
+    const result = await this.memberService.rejectLeave(roomId, requestId, user.sub, rejectionReason);
+    return {
+      success: true,
+      message: 'Leave request rejected successfully',
+      data: result,
+    };
+  }
 }

@@ -3,8 +3,8 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { MemberRepository } from '../repositories/member.repository';
 import { RoomRepository } from '../repositories/room.repository';
 import { EventNames } from '../../../events/event-names';
-import { RoomJoinRequestedPayload, RoomMemberAddedPayload, RoomMemberRoleChangedPayload, RoomMemberDeactivatedPayload, DomainEventEnvelope } from '../../../events/payloads';
-import { JoinRequestStatus, Role } from '../../../../generated/prisma/client/enums';
+import { RoomJoinRequestedPayload, RoomMemberAddedPayload, RoomMemberRoleChangedPayload, RoomMemberDeactivatedPayload, RoomLeaveRequestedPayload, RoomLeaveRejectedPayload, DomainEventEnvelope } from '../../../events/payloads';
+import { JoinRequestStatus, Role, MemberStatus } from '../../../../generated/prisma/client/enums';
 
 /**
  * Business logic for membership and join-request flows:
@@ -121,8 +121,8 @@ export class MemberService {
     return this.memberRepository.rejectJoinRequest(requestId, adminId, rejectionReason);
   }
 
-  async ensureSafeAdminRemoval(roomId: string, userId: string, currentAdminId: string) {
-    if (userId === currentAdminId) {
+  async ensureSafeAdminRemoval(roomId: string, userId: string, currentAdminId?: string) {
+    if (currentAdminId && userId === currentAdminId) {
       throw new ForbiddenException({
         code: 'ROOM_ADMIN_CANNOT_KICK_SELF',
         message: 'An admin cannot alter their own role or remove themselves using this endpoint.',
@@ -195,5 +195,83 @@ export class MemberService {
     } as DomainEventEnvelope<RoomMemberDeactivatedPayload>);
 
     return deactivatedMember;
+  }
+
+  async requestLeave(roomId: string, userId: string) {
+    // Pass undefined for currentAdminId to skip the "cannot kick self" check,
+    // but still enforce the last-admin safeguard.
+    await this.ensureSafeAdminRemoval(roomId, userId);
+
+    const updatedMember = await this.memberRepository.setLeaveRequestedStatus(roomId, userId);
+
+    this.eventEmitter.emit(EventNames.ROOM_LEAVE_REQUESTED, {
+      eventId: crypto.randomUUID(),
+      eventName: EventNames.ROOM_LEAVE_REQUESTED,
+      aggregateId: updatedMember.id,
+      roomId,
+      actorId: userId,
+      occurredAt: new Date().toISOString(),
+      payload: {
+        roomId,
+        userId,
+      },
+    } as DomainEventEnvelope<RoomLeaveRequestedPayload>);
+
+    return updatedMember;
+  }
+
+  async approveLeave(roomId: string, userId: string, adminId: string) {
+    const member = await this.memberRepository.getMember(roomId, userId);
+    if (!member || member.status !== MemberStatus.LEAVE_REQUESTED) {
+      throw new ConflictException({
+        code: 'ROOM_LEAVE_REQUEST_NOT_FOUND',
+        message: 'Leave request not found or member is not in LEAVE_REQUESTED status.',
+      });
+    }
+
+    const deactivatedMember = await this.memberRepository.deactivateMember(roomId, userId);
+
+    this.eventEmitter.emit(EventNames.ROOM_MEMBER_DEACTIVATED, {
+      eventId: crypto.randomUUID(),
+      eventName: EventNames.ROOM_MEMBER_DEACTIVATED,
+      aggregateId: deactivatedMember.id,
+      roomId,
+      actorId: adminId,
+      occurredAt: new Date().toISOString(),
+      payload: {
+        roomId,
+        userId,
+      },
+    } as DomainEventEnvelope<RoomMemberDeactivatedPayload>);
+
+    return deactivatedMember;
+  }
+
+  async rejectLeave(roomId: string, userId: string, adminId: string, rejectionReason?: string) {
+    const member = await this.memberRepository.getMember(roomId, userId);
+    if (!member || member.status !== MemberStatus.LEAVE_REQUESTED) {
+      throw new ConflictException({
+        code: 'ROOM_LEAVE_REQUEST_NOT_FOUND',
+        message: 'Leave request not found or member is not in LEAVE_REQUESTED status.',
+      });
+    }
+
+    const activeMember = await this.memberRepository.setActiveStatus(roomId, userId);
+
+    this.eventEmitter.emit(EventNames.ROOM_LEAVE_REJECTED, {
+      eventId: crypto.randomUUID(),
+      eventName: EventNames.ROOM_LEAVE_REJECTED,
+      aggregateId: activeMember.id,
+      roomId,
+      actorId: adminId,
+      occurredAt: new Date().toISOString(),
+      payload: {
+        roomId,
+        userId,
+        rejectionReason,
+      },
+    } as DomainEventEnvelope<RoomLeaveRejectedPayload>);
+
+    return activeMember;
   }
 }

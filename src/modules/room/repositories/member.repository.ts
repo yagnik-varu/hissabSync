@@ -132,4 +132,22 @@ export class MemberRepository {
       },
     });
   }
+
+  async setLeaveRequestedStatus(roomId: string, userId: string) {
+    return this.prisma.roomMember.update({
+      where: { roomId_userId: { roomId, userId } },
+      data: {
+        status: MemberStatus.LEAVE_REQUESTED,
+      },
+    });
+  }
+
+  async setActiveStatus(roomId: string, userId: string) {
+    return this.prisma.roomMember.update({
+      where: { roomId_userId: { roomId, userId } },
+      data: {
+        status: MemberStatus.ACTIVE,
+      },
+    });
+  }
 }

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { OnEvent, EventEmitter2 } from '@nestjs/event-emitter';
 import { randomUUID } from 'crypto';
 import { EventNames } from '../../../events/event-names';
@@ -50,5 +50,31 @@ export class TreasuryService {
     } catch (error) {
       this.logger.error(`Failed to create Treasury Account for Room ${event.payload.roomId}`, error);
     }
+  }
+
+  /**
+   * Retrieves the current treasury balance and ledger-computed totals.
+   */
+  async getTreasurySummary(roomId: string) {
+    const summary = await this.treasuryRepository.getTreasurySummary(roomId);
+    
+    if (!summary) {
+      throw new NotFoundException({
+        code: 'TREASURY_NOT_FOUND',
+        message: 'Treasury account not found for this room.',
+      });
+    }
+
+    // Prisma.Decimal is returned from the sum aggregation. We format to fixed 2 decimal places string.
+    // If there are no transactions yet, the sum will be null.
+    const totalContributions = summary.totalContributions ? summary.totalContributions.toFixed(2) : '0.00';
+    const totalReimbursements = summary.totalReimbursements ? summary.totalReimbursements.toFixed(2) : '0.00';
+
+    return {
+      currentBalance: summary.account.currentBalance.toFixed(2),
+      totalContributions,
+      totalReimbursements,
+      currencyCode: summary.account.room.settings?.currencyCode ?? 'INR',
+    };
   }
 }

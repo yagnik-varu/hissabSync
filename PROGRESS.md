@@ -31,7 +31,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 4
-**Doing right now:** Scaffolding TreasuryModule. Implemented `room.created` event listener to automatically provision `TreasuryAccount` with 0.00 balance.
+**Doing right now:** Phase 4: `GET /rooms/:roomId/treasury` endpoint is complete. Next: Submit Contribution workflow.
 **Blocked by:** none
 
 ---

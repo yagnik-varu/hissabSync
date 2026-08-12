@@ -6,6 +6,9 @@ import { TreasuryRepository } from '../repositories/treasury.repository';
 import type { RoomCreatedPayload } from '../../../events/payloads/room-created.payload';
 import type { DomainEventEnvelope } from '../../../events/payloads/domain-event.envelope';
 import type { TreasuryAccountCreatedPayload } from '../../../events/payloads/treasury-account-created.payload';
+import type { ContributionSubmittedPayload } from '../../../events/payloads/contribution-submitted.payload';
+import { SubmitContributionDto } from '../dto/submit-contribution.dto';
+import { ListContributionsDto } from '../dto/list-contributions.dto';
 
 @Injectable()
 export class TreasuryService {
@@ -75,6 +78,57 @@ export class TreasuryService {
       totalContributions,
       totalReimbursements,
       currencyCode: summary.account.room.settings?.currencyCode ?? 'INR',
+    };
+  }
+
+  /**
+   * Submits a new contribution and emits an event.
+   */
+  async submitContribution(roomId: string, userId: string, dto: SubmitContributionDto) {
+    const contribution = await this.treasuryRepository.createContribution(roomId, userId, dto.amount, dto.note);
+
+    const eventPayload: DomainEventEnvelope<ContributionSubmittedPayload> = {
+      eventId: randomUUID(),
+      eventName: EventNames.CONTRIBUTION_SUBMITTED,
+      aggregateId: contribution.id,
+      roomId,
+      actorId: userId,
+      occurredAt: new Date().toISOString(),
+      payload: {
+        contributionId: contribution.id,
+        roomId,
+        amount: dto.amount,
+        submittedBy: userId,
+        note: dto.note,
+      },
+      metadata: {
+        correlationId: randomUUID(),
+        sourceModule: 'treasury',
+      },
+    };
+
+    this.eventEmitter.emit(EventNames.CONTRIBUTION_SUBMITTED, eventPayload);
+    
+    return contribution;
+  }
+
+  /**
+   * Lists contributions with pagination.
+   */
+  async listContributions(roomId: string, filters: ListContributionsDto) {
+    const { data, totalItems } = await this.treasuryRepository.findContributions(roomId, filters);
+    const totalPages = Math.ceil(totalItems / filters.limit);
+    
+    return {
+      data,
+      meta: {
+        page: filters.page,
+        limit: filters.limit,
+        totalItems,
+        totalPages,
+        hasNextPage: filters.page < totalPages,
+        hasPreviousPage: filters.page > 1,
+      }
     };
   }
 }

@@ -31,7 +31,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 4
-**Doing right now:** Phase 4: `GET /rooms/:roomId/treasury` endpoint is complete. Next: Submit Contribution workflow.
+**Doing right now:** Phase 4: Contribution endpoints implemented. Next: Expense Workflow (Phase 5).
 **Blocked by:** none
 
 ---

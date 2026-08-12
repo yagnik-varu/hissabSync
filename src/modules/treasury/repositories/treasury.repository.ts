@@ -60,4 +60,50 @@ export class TreasuryRepository {
       totalReimbursements: reimbursementsSum._sum.amount,
     };
   }
+
+  /**
+   * Creates a new pending contribution record for a member.
+   */
+  async createContribution(roomId: string, userId: string, amount: string, note?: string) {
+    return this.prisma.contribution.create({
+      data: {
+        roomId,
+        contributorId: userId,
+        amount,
+        note,
+        status: 'PENDING',
+      },
+    });
+  }
+
+  /**
+   * Finds a paginated list of contributions based on filters.
+   */
+  async findContributions(roomId: string, filters: any) {
+    const { status, contributorId, dateFrom, dateTo, page, limit } = filters;
+    const where: any = { roomId };
+    
+    if (status) where.status = status;
+    if (contributorId) where.contributorId = contributorId;
+    if (dateFrom || dateTo) {
+      where.createdAt = {};
+      if (dateFrom) where.createdAt.gte = new Date(dateFrom);
+      if (dateTo) where.createdAt.lte = new Date(dateTo);
+    }
+
+    const [data, totalItems] = await Promise.all([
+      this.prisma.contribution.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          contributor: { select: { id: true, fullName: true, email: true } },
+        }
+      }),
+      this.prisma.contribution.count({ where }),
+    ]);
+
+    return { data, totalItems };
+  }
 }

@@ -1,0 +1,54 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { OnEvent, EventEmitter2 } from '@nestjs/event-emitter';
+import { randomUUID } from 'crypto';
+import { EventNames } from '../../../events/event-names';
+import { TreasuryRepository } from '../repositories/treasury.repository';
+import type { RoomCreatedPayload } from '../../../events/payloads/room-created.payload';
+import type { DomainEventEnvelope } from '../../../events/payloads/domain-event.envelope';
+import type { TreasuryAccountCreatedPayload } from '../../../events/payloads/treasury-account-created.payload';
+
+@Injectable()
+export class TreasuryService {
+  private readonly logger = new Logger(TreasuryService.name);
+
+  constructor(
+    private readonly treasuryRepository: TreasuryRepository,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
+
+  /**
+   * Listens for the `room.created` event and provisions a 1:1 Treasury Account.
+   * This is entirely decoupled from RoomModule.
+   */
+  @OnEvent(EventNames.ROOM_CREATED)
+  async handleRoomCreatedEvent(event: DomainEventEnvelope<RoomCreatedPayload>) {
+    this.logger.log(`Handling ${EventNames.ROOM_CREATED} event for room ${event.payload.roomId}...`);
+    
+    try {
+      const account = await this.treasuryRepository.createAccount(event.payload.roomId);
+      this.logger.log(`Created Treasury Account (ID: ${account.id}) for Room ${event.payload.roomId}`);
+
+      const accountCreatedEvent: DomainEventEnvelope<TreasuryAccountCreatedPayload> = {
+        eventId: randomUUID(),
+        eventName: EventNames.TREASURY_ACCOUNT_CREATED,
+        aggregateId: account.id,
+        roomId: event.payload.roomId,
+        actorId: event.actorId,
+        occurredAt: new Date().toISOString(),
+        payload: {
+          accountId: account.id,
+          roomId: event.payload.roomId,
+          initialBalance: account.currentBalance.toString(),
+        },
+        metadata: {
+          correlationId: event.metadata.correlationId,
+          sourceModule: 'treasury',
+        },
+      };
+
+      this.eventEmitter.emit(EventNames.TREASURY_ACCOUNT_CREATED, accountCreatedEvent);
+    } catch (error) {
+      this.logger.error(`Failed to create Treasury Account for Room ${event.payload.roomId}`, error);
+    }
+  }
+}

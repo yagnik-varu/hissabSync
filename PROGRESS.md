@@ -16,8 +16,8 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 
 - [x] **Phase 1** — Project Foundation & Database Setup
 - [x] **Phase 2** — Authentication & Profile Module
-- [~] **Phase 3** — Room Lifecycle & RBAC Module
-- [ ] **Phase 4** — Treasury Pool & Contribution Workflow
+- [x] **Phase 3** — Room Lifecycle & RBAC Module
+- [~] **Phase 4** — Treasury Pool & Contribution Workflow
 - [ ] **Phase 5** — Expense Tracking & Categories
 - [ ] **Phase 6** — Reimbursement Payout Engine
 - [ ] **Phase 7** — In-App Notifications & Audit Trail
@@ -30,8 +30,8 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 
 ## 2. Current Focus
 
-**Active phase:** Phase 3
-**Doing right now:** Phase 3 membership management (CRUD, join/leave requests, role updates, kicks) is fully complete. Next: Phase 4 (Treasury Module).
+**Active phase:** Phase 4
+**Doing right now:** Scaffolding TreasuryModule. Implemented `room.created` event listener to automatically provision `TreasuryAccount` with 0.00 balance.
 **Blocked by:** none
 
 ---

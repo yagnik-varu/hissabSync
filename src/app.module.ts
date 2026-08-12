@@ -10,6 +10,7 @@ import swaggerConfig from './config/swagger.config';
 import throttlerConfig from './config/throttler.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { RoomModule } from './modules/room/room.module';
+import { TreasuryModule } from './modules/treasury/treasury.module';
 import { PrismaModule } from './database/prisma.module';
 
 @Module({
@@ -37,6 +38,7 @@ import { PrismaModule } from './database/prisma.module';
     PrismaModule,
     AuthModule,
     RoomModule,
+    TreasuryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

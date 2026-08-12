@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Delete, Body, Param, Query, UseGuards, ParseUUIDPipe } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { TreasuryService } from '../services/treasury.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
@@ -51,6 +51,23 @@ export class ContributionController {
       message: 'Contributions retrieved successfully',
       data,
       meta,
+    };
+  }
+
+  @Delete(':id')
+  @Roles(Role.ADMIN, Role.ACCOUNTANT, Role.MEMBER)
+  @ApiOperation({ summary: 'Cancel a pending contribution' })
+  @ApiResponse({ status: 200, description: 'Contribution cancelled successfully' })
+  async cancelContribution(
+    @CurrentRoom() room: RoomContext,
+    @CurrentUser() user: UserPayload,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    const contribution = await this.treasuryService.cancelContribution(room.id, user.sub, id);
+    return {
+      success: true,
+      message: 'Contribution cancelled successfully',
+      data: contribution,
     };
   }
 }

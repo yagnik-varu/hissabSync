@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { OnEvent, EventEmitter2 } from '@nestjs/event-emitter';
 import { randomUUID } from 'crypto';
 import { EventNames } from '../../../events/event-names';
@@ -7,6 +7,7 @@ import type { RoomCreatedPayload } from '../../../events/payloads/room-created.p
 import type { DomainEventEnvelope } from '../../../events/payloads/domain-event.envelope';
 import type { TreasuryAccountCreatedPayload } from '../../../events/payloads/treasury-account-created.payload';
 import type { ContributionSubmittedPayload } from '../../../events/payloads/contribution-submitted.payload';
+import type { ContributionCancelledPayload } from '../../../events/payloads/contribution-cancelled.payload';
 import { SubmitContributionDto } from '../dto/submit-contribution.dto';
 import { ListContributionsDto } from '../dto/list-contributions.dto';
 
@@ -130,5 +131,48 @@ export class TreasuryService {
         hasPreviousPage: filters.page > 1,
       }
     };
+  }
+
+  /**
+   * Cancels a pending contribution, ensuring only the original contributor can cancel.
+   */
+  async cancelContribution(roomId: string, userId: string, contributionId: string) {
+    const contribution = await this.treasuryRepository.getContributionById(roomId, contributionId);
+
+    if (!contribution) {
+      throw new NotFoundException('CONTRIBUTION_NOT_FOUND');
+    }
+
+    if (contribution.contributorId !== userId) {
+      throw new ForbiddenException('CONTRIBUTION_ACCESS_DENIED');
+    }
+
+    if (contribution.status !== 'PENDING') {
+      throw new BadRequestException('CONTRIBUTION_CANNOT_CANCEL');
+    }
+
+    const updated = await this.treasuryRepository.updateContributionStatus(contributionId, 'CANCELLED');
+
+    const eventPayload: DomainEventEnvelope<ContributionCancelledPayload> = {
+      eventId: randomUUID(),
+      eventName: EventNames.CONTRIBUTION_CANCELLED,
+      aggregateId: contribution.id,
+      roomId,
+      actorId: userId,
+      occurredAt: new Date().toISOString(),
+      payload: {
+        contributionId: contribution.id,
+        roomId,
+        cancelledBy: userId,
+      },
+      metadata: {
+        correlationId: randomUUID(),
+        sourceModule: 'treasury',
+      },
+    };
+
+    this.eventEmitter.emit(EventNames.CONTRIBUTION_CANCELLED, eventPayload);
+
+    return updated;
   }
 }

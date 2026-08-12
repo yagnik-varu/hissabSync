@@ -106,4 +106,23 @@ export class TreasuryRepository {
 
     return { data, totalItems };
   }
+
+  /**
+   * Retrieves a single contribution by ID and Room ID.
+   */
+  async getContributionById(roomId: string, id: string) {
+    return this.prisma.contribution.findFirst({
+      where: { id, roomId },
+    });
+  }
+
+  /**
+   * Updates the status of a contribution.
+   */
+  async updateContributionStatus(id: string, status: any) {
+    return this.prisma.contribution.update({
+      where: { id },
+      data: { status },
+    });
+  }
 }

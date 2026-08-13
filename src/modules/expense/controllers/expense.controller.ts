@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, Query, UseGuards, ParseUUIDPipe } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ExpenseService } from '../services/expense.service';
 import { SubmitExpenseDto } from '../dto/submit-expense.dto';
@@ -63,6 +63,25 @@ export class ExpenseController {
       success: true,
       message: 'Expense retrieved successfully',
       data: expense,
+    };
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Cancel a pending expense (submitter only)' })
+  @ApiResponse({ status: 200, description: 'Expense cancelled successfully' })
+  @ApiResponse({ status: 400, description: 'Only PENDING expenses can be cancelled' })
+  @ApiResponse({ status: 403, description: 'You can only cancel your own expenses' })
+  @ApiResponse({ status: 404, description: 'Expense not found' })
+  async cancelExpense(
+    @CurrentRoom() room: RoomContext,
+    @CurrentUser() user: UserPayload,
+    @Param('id', ParseUUIDPipe) expenseId: string,
+  ) {
+    await this.expenseService.cancelExpense(room.id, user.sub, expenseId);
+    return {
+      success: true,
+      message: 'Expense cancelled successfully',
+      data: {},
     };
   }
 }

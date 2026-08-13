@@ -81,4 +81,11 @@ export class ExpenseRepository {
       },
     });
   }
+
+  async updateExpenseStatus(id: string, status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED') {
+    return this.prisma.expense.update({
+      where: { id },
+      data: { status },
+    });
+  }
 }

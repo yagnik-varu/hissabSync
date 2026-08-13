@@ -31,7 +31,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 5
-**Doing right now:** Completed Expense endpoints (GET, POST, GET /:id) including category room-scoping validation. Next: Expense approval/rejection/cancellation workflow.
+**Doing right now:** Completed Expense cancellation endpoint. Next: Expense approval/rejection workflow.
 **Blocked by:** Local Docker daemon down (cannot verify side-effects against live DB).
 
 ---
@@ -60,6 +60,7 @@ docs exactly, don't log it — that's the default, not news.
 - `EventEmitterModule.forRoot()` placed inside RoomModule (first module to emit events). NestJS makes this global, so future modules can just inject `EventEmitter2` without re-importing.
 - `room.created` event emitted even though no listeners exist yet — intentionally decoupled; Treasury and Category modules will subscribe later.
 - `expense_categories.category_id` uses `ON DELETE RESTRICT` (not CASCADE/SET NULL) because deleting a category must not orphan or destroy historical expenses, which would violate the immutable ledger (NFR-05). Categories in use cannot be deleted.
+- **Architectural Decision**: Kept "assert owner + assert PENDING" logic separated in `ExpenseService` and `TreasuryService` (for contribution cancellation) rather than creating a shared generic helper. This enforces strict module boundaries, preventing a generic helper from creating hidden coupling between independent aggregates.
 
 ---
 

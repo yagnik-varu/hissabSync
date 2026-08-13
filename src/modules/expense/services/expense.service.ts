@@ -1,11 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { NotFoundException, ForbiddenException, BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ExpenseRepository } from '../repositories/expense.repository';
-
-import { NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CategoryService } from '../../category/services/category.service';
 import { EventNames } from '../../../events/event-names';
 import type { ExpenseSubmittedPayload } from '../../../events/payloads/expense-submitted.payload';
+import type { ExpenseCancelledPayload } from '../../../events/payloads/expense-cancelled.payload';
 import type { SubmitExpenseDto } from '../dto/submit-expense.dto';
 import type { ListExpensesDto } from '../dto/list-expenses.dto';
 
@@ -84,5 +83,56 @@ export class ExpenseService {
       });
     }
     return expense;
+  }
+
+  async cancelExpense(roomId: string, userId: string, expenseId: string) {
+    const expense = await this.expenseRepository.findExpenseById(roomId, expenseId);
+
+    if (!expense) {
+      throw new NotFoundException({
+        code: 'EXPENSE_NOT_FOUND',
+        message: 'Expense record does not exist in this room.',
+      });
+    }
+
+    // Access control check: Only the submitter can cancel
+    if (expense.submittedBy !== userId) {
+      throw new ForbiddenException({
+        code: 'EXPENSE_ACCESS_DENIED',
+        message: 'You can only cancel your own expenses.',
+      });
+    }
+
+    // Precondition check: Must be PENDING
+    if (expense.status !== 'PENDING') {
+      throw new BadRequestException({
+        code: 'EXPENSE_CANNOT_CANCEL',
+        message: 'Only PENDING expenses can be cancelled.',
+      });
+    }
+
+    const updated = await this.expenseRepository.updateExpenseStatus(expenseId, 'CANCELLED');
+
+    const eventPayload: DomainEventEnvelope<ExpenseCancelledPayload> = {
+      eventId: randomUUID(),
+      eventName: EventNames.EXPENSE_CANCELLED,
+      aggregateId: expense.id,
+      roomId,
+      actorId: userId,
+      occurredAt: new Date().toISOString(),
+      payload: {
+        expenseId: expense.id,
+        roomId,
+        cancelledBy: userId,
+      },
+      metadata: {
+        correlationId: randomUUID(),
+        sourceModule: 'expense',
+      },
+    };
+
+    this.eventEmitter.emit(EventNames.EXPENSE_CANCELLED, eventPayload);
+
+    return updated;
   }
 }

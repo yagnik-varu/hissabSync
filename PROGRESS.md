@@ -31,7 +31,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 5
-**Doing right now:** Scaffolded CategoryModule and ExpenseModule, and implemented default categories seeding on `room.created`. Next: build endpoints.
+**Doing right now:** Completed ExpenseCategory endpoints (GET, POST, DELETE) with RBAC and constraint handling. Next: build Expense endpoints.
 **Blocked by:** Local Docker daemon down (cannot verify side-effects against live DB).
 
 ---
@@ -59,6 +59,7 @@ docs exactly, don't log it — that's the default, not news.
 - Split Room module into two controller/service/repository pairs: `Room*` (CRUD/settings) and `Member*` (memberships/join-requests). Docs don't prescribe this split, but it follows SRP and avoids a god-service.
 - `EventEmitterModule.forRoot()` placed inside RoomModule (first module to emit events). NestJS makes this global, so future modules can just inject `EventEmitter2` without re-importing.
 - `room.created` event emitted even though no listeners exist yet — intentionally decoupled; Treasury and Category modules will subscribe later.
+- `expense_categories.category_id` uses `ON DELETE RESTRICT` (not CASCADE/SET NULL) because deleting a category must not orphan or destroy historical expenses, which would violate the immutable ledger (NFR-05). Categories in use cannot be deleted.
 
 ---
 

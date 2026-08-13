@@ -5,6 +5,8 @@ import { CategoryService } from '../../category/services/category.service';
 import { EventNames } from '../../../events/event-names';
 import type { ExpenseSubmittedPayload } from '../../../events/payloads/expense-submitted.payload';
 import type { ExpenseCancelledPayload } from '../../../events/payloads/expense-cancelled.payload';
+import type { ExpenseApprovedPayload } from '../../../events/payloads/expense-approved.payload';
+import type { ExpenseRejectedPayload } from '../../../events/payloads/expense-rejected.payload';
 import type { SubmitExpenseDto } from '../dto/submit-expense.dto';
 import type { ListExpensesDto } from '../dto/list-expenses.dto';
 
@@ -134,5 +136,105 @@ export class ExpenseService {
     this.eventEmitter.emit(EventNames.EXPENSE_CANCELLED, eventPayload);
 
     return updated;
+  }
+
+  async approveExpense(roomId: string, id: string, adminId: string) {
+    try {
+      const expense = await this.expenseRepository.approveExpenseTx(roomId, id, adminId);
+      
+      const eventPayload: DomainEventEnvelope<ExpenseApprovedPayload> = {
+        eventId: randomUUID(),
+        eventName: EventNames.EXPENSE_APPROVED,
+        aggregateId: expense.id,
+        roomId,
+        actorId: adminId,
+        occurredAt: new Date().toISOString(),
+        payload: {
+          expenseId: expense.id,
+          roomId,
+          submittedBy: expense.submittedBy,
+          amount: expense.amount.toString(),
+          title: expense.title,
+          approvedBy: adminId,
+        },
+        metadata: {
+          correlationId: randomUUID(),
+          sourceModule: 'expense',
+        },
+      };
+
+      this.eventEmitter.emit(EventNames.EXPENSE_APPROVED, eventPayload);
+
+      return expense;
+    } catch (error: any) {
+      if (error.code === 'P2025' || error.message === 'No Expense found') {
+        throw new NotFoundException({
+          code: 'EXPENSE_NOT_FOUND',
+          message: 'Expense record does not exist in this room.',
+        });
+      }
+      if (error.message === 'EXPENSE_NOT_IN_ROOM') {
+        throw new NotFoundException({
+          code: 'EXPENSE_NOT_FOUND',
+          message: 'Expense record does not exist in this room.',
+        });
+      }
+      if (error.message === 'EXPENSE_ALREADY_PROCESSED') {
+        throw new BadRequestException({
+          code: 'EXPENSE_ALREADY_PROCESSED',
+          message: 'This expense has already been processed (approved/rejected/cancelled).',
+        });
+      }
+      throw error;
+    }
+  }
+
+  async rejectExpense(roomId: string, id: string, adminId: string, reason: string) {
+    try {
+      const expense = await this.expenseRepository.rejectExpenseTx(roomId, id, adminId, reason);
+
+      const eventPayload: DomainEventEnvelope<ExpenseRejectedPayload> = {
+        eventId: randomUUID(),
+        eventName: EventNames.EXPENSE_REJECTED,
+        aggregateId: expense.id,
+        roomId,
+        actorId: adminId,
+        occurredAt: new Date().toISOString(),
+        payload: {
+          expenseId: expense.id,
+          roomId,
+          rejectedBy: adminId,
+          reason,
+        },
+        metadata: {
+          correlationId: randomUUID(),
+          sourceModule: 'expense',
+        },
+      };
+
+      this.eventEmitter.emit(EventNames.EXPENSE_REJECTED, eventPayload);
+
+      return expense;
+    } catch (error: any) {
+      if (error.code === 'P2025' || error.message === 'No Expense found') {
+        throw new NotFoundException({
+          code: 'EXPENSE_NOT_FOUND',
+          message: 'Expense record does not exist in this room.',
+        });
+      }
+      if (error.message === 'EXPENSE_NOT_IN_ROOM') {
+        throw new NotFoundException({
+          code: 'EXPENSE_NOT_FOUND',
+          message: 'Expense record does not exist in this room.',
+        });
+      }
+      if (error.message === 'EXPENSE_ALREADY_PROCESSED') {
+        throw new BadRequestException({
+          code: 'EXPENSE_ALREADY_PROCESSED',
+          message: 'This expense has already been processed (approved/rejected/cancelled).',
+        });
+      }
+      throw error;
+    }
   }
 }

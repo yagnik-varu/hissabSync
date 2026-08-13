@@ -1,10 +1,14 @@
-import { Controller, Get, Post, Delete, Body, Param, Query, UseGuards, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Patch, Body, Param, Query, UseGuards, ParseUUIDPipe } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ExpenseService } from '../services/expense.service';
 import { SubmitExpenseDto } from '../dto/submit-expense.dto';
 import { ListExpensesDto } from '../dto/list-expenses.dto';
+import { RejectExpenseDto } from '../dto/reject-expense.dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RoomMemberGuard } from '../../../common/guards/room-member.guard';
+import { RolesGuard } from '../../../common/guards/roles.guard';
+import { Roles } from '../../../common/decorators/roles.decorator';
+import { Role } from '../../../common/enums/role.enum';
 import { CurrentRoom } from '../../../common/decorators/current-room.decorator';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import type { RoomContext } from '../../../common/types/room-context.type';
@@ -82,6 +86,47 @@ export class ExpenseController {
       success: true,
       message: 'Expense cancelled successfully',
       data: {},
+    };
+  }
+
+  @Patch(':id/approve')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN, Role.ACCOUNTANT)
+  @ApiOperation({ summary: 'Approve an expense' })
+  @ApiResponse({ status: 200, description: 'Expense approved successfully' })
+  @ApiResponse({ status: 400, description: 'Expense already processed' })
+  @ApiResponse({ status: 404, description: 'Expense not found' })
+  async approveExpense(
+    @CurrentRoom() room: RoomContext,
+    @CurrentUser() user: UserPayload,
+    @Param('id', ParseUUIDPipe) expenseId: string,
+  ) {
+    const expense = await this.expenseService.approveExpense(room.id, expenseId, user.sub);
+    return {
+      success: true,
+      message: 'Expense approved successfully',
+      data: expense,
+    };
+  }
+
+  @Patch(':id/reject')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN, Role.ACCOUNTANT)
+  @ApiOperation({ summary: 'Reject an expense' })
+  @ApiResponse({ status: 200, description: 'Expense rejected successfully' })
+  @ApiResponse({ status: 400, description: 'Expense already processed' })
+  @ApiResponse({ status: 404, description: 'Expense not found' })
+  async rejectExpense(
+    @CurrentRoom() room: RoomContext,
+    @CurrentUser() user: UserPayload,
+    @Param('id', ParseUUIDPipe) expenseId: string,
+    @Body() dto: RejectExpenseDto,
+  ) {
+    const expense = await this.expenseService.rejectExpense(room.id, expenseId, user.sub, dto.rejectionReason);
+    return {
+      success: true,
+      message: 'Expense rejected successfully',
+      data: expense,
     };
   }
 }

@@ -88,4 +88,58 @@ export class ExpenseRepository {
       data: { status },
     });
   }
+
+  /**
+   * Approves an expense inside a single ACID transaction.
+   * Enforces row-level locking to prevent concurrent modifications.
+   */
+  async approveExpenseTx(roomId: string, id: string, reviewerId: string) {
+    return this.prisma.$transaction(async (tx) => {
+      const expense = await tx.expense.findUniqueOrThrow({ where: { id } });
+
+      if (expense.roomId !== roomId) {
+        throw new Error('EXPENSE_NOT_IN_ROOM');
+      }
+
+      if (expense.status !== 'PENDING') {
+        throw new Error('EXPENSE_ALREADY_PROCESSED');
+      }
+
+      return tx.expense.update({
+        where: { id },
+        data: {
+          status: 'APPROVED',
+          reviewedBy: reviewerId,
+          reviewedAt: new Date(),
+        },
+      });
+    });
+  }
+
+  /**
+   * Rejects an expense inside a transaction.
+   */
+  async rejectExpenseTx(roomId: string, id: string, reviewerId: string, reason?: string) {
+    return this.prisma.$transaction(async (tx) => {
+      const expense = await tx.expense.findUniqueOrThrow({ where: { id } });
+
+      if (expense.roomId !== roomId) {
+        throw new Error('EXPENSE_NOT_IN_ROOM');
+      }
+
+      if (expense.status !== 'PENDING') {
+        throw new Error('EXPENSE_ALREADY_PROCESSED');
+      }
+
+      return tx.expense.update({
+        where: { id },
+        data: {
+          status: 'REJECTED',
+          rejectionReason: reason,
+          reviewedBy: reviewerId,
+          reviewedAt: new Date(),
+        },
+      });
+    });
+  }
 }

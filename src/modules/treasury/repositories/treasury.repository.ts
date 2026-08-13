@@ -203,4 +203,35 @@ export class TreasuryRepository {
       });
     });
   }
+
+  /**
+   * Finds a paginated list of treasury transactions based on filters.
+   */
+  async findTreasuryTransactions(roomId: string, filters: any) {
+    const { transactionType, referenceType, dateFrom, dateTo, page, limit } = filters;
+    const where: any = { roomId };
+    
+    if (transactionType) where.transactionType = transactionType;
+    if (referenceType) where.referenceType = referenceType;
+    if (dateFrom || dateTo) {
+      where.createdAt = {};
+      if (dateFrom) where.createdAt.gte = new Date(dateFrom);
+      if (dateTo) where.createdAt.lte = new Date(dateTo);
+    }
+
+    const [data, totalItems] = await Promise.all([
+      this.prisma.treasuryTransaction.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          actor: { select: { id: true, fullName: true, email: true } },
+        }
+      }),
+      this.prisma.treasuryTransaction.count({ where }),
+    ]);
+
+    return { data, totalItems };
+  }
 }

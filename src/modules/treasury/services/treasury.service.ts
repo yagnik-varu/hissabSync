@@ -12,6 +12,7 @@ import type { ContributionApprovedPayload } from '../../../events/payloads/contr
 import type { ContributionRejectedPayload } from '../../../events/payloads/contribution-rejected.payload';
 import { SubmitContributionDto } from '../dto/submit-contribution.dto';
 import { ListContributionsDto } from '../dto/list-contributions.dto';
+import { ListTreasuryTransactionsDto } from '../dto/list-treasury-transactions.dto';
 
 @Injectable()
 export class TreasuryService {
@@ -262,5 +263,25 @@ export class TreasuryService {
       }
       throw error;
     }
+  }
+
+  /**
+   * Lists treasury transactions (ledger) with pagination.
+   */
+  async listTreasuryTransactions(roomId: string, filters: ListTreasuryTransactionsDto) {
+    const { data, totalItems } = await this.treasuryRepository.findTreasuryTransactions(roomId, filters);
+    const totalPages = Math.ceil(totalItems / filters.limit);
+    
+    return {
+      data,
+      meta: {
+        page: filters.page,
+        limit: filters.limit,
+        totalItems,
+        totalPages,
+        hasNextPage: filters.page < totalPages,
+        hasPreviousPage: filters.page > 1,
+      }
+    };
   }
 }

@@ -31,7 +31,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 5
-**Doing right now:** Completed ExpenseCategory endpoints (GET, POST, DELETE) with RBAC and constraint handling. Next: build Expense endpoints.
+**Doing right now:** Completed Expense endpoints (GET, POST, GET /:id) including category room-scoping validation. Next: Expense approval/rejection/cancellation workflow.
 **Blocked by:** Local Docker daemon down (cannot verify side-effects against live DB).
 
 ---

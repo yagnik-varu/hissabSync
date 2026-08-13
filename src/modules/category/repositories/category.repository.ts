@@ -47,4 +47,13 @@ export class CategoryRepository {
       },
     });
   }
+
+  async findById(roomId: string, categoryId: string) {
+    return this.prisma.expenseCategory.findUnique({
+      where: {
+        id: categoryId,
+        roomId, // strict scoping to room
+      },
+    });
+  }
 }

@@ -31,6 +31,21 @@ export class CategoryService {
     return this.categoryRepository.findAll(roomId);
   }
 
+  /**
+   * Verifies a category exists exactly within the context of the given room.
+   * Prevents cross-room data leak vulnerabilities.
+   */
+  async verifyCategoryExists(roomId: string, categoryId: string) {
+    const category = await this.categoryRepository.findById(roomId, categoryId);
+    if (!category) {
+      throw new NotFoundException({
+        code: 'CATEGORY_NOT_FOUND',
+        message: 'Expense category does not exist in this room.',
+      });
+    }
+    return category;
+  }
+
   async createCategory(roomId: string, name: string) {
     try {
       return await this.categoryRepository.create(roomId, name);

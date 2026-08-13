@@ -8,6 +8,8 @@ import type { DomainEventEnvelope } from '../../../events/payloads/domain-event.
 import type { TreasuryAccountCreatedPayload } from '../../../events/payloads/treasury-account-created.payload';
 import type { ContributionSubmittedPayload } from '../../../events/payloads/contribution-submitted.payload';
 import type { ContributionCancelledPayload } from '../../../events/payloads/contribution-cancelled.payload';
+import type { ContributionApprovedPayload } from '../../../events/payloads/contribution-approved.payload';
+import type { ContributionRejectedPayload } from '../../../events/payloads/contribution-rejected.payload';
 import { SubmitContributionDto } from '../dto/submit-contribution.dto';
 import { ListContributionsDto } from '../dto/list-contributions.dto';
 
@@ -174,5 +176,91 @@ export class TreasuryService {
     this.eventEmitter.emit(EventNames.CONTRIBUTION_CANCELLED, eventPayload);
 
     return updated;
+  }
+
+  /**
+   * Approves a contribution and emits an event.
+   */
+  async approveContribution(roomId: string, id: string, adminId: string) {
+    try {
+      const contribution = await this.treasuryRepository.approveContributionTx(roomId, id, adminId);
+      
+      const eventPayload: DomainEventEnvelope<ContributionApprovedPayload> = {
+        eventId: randomUUID(),
+        eventName: EventNames.CONTRIBUTION_APPROVED,
+        aggregateId: contribution.id,
+        roomId,
+        actorId: adminId,
+        occurredAt: new Date().toISOString(),
+        payload: {
+          contributionId: contribution.id,
+          roomId,
+          approvedBy: adminId,
+          amount: contribution.amount.toString(),
+        },
+        metadata: {
+          correlationId: randomUUID(),
+          sourceModule: 'treasury',
+        },
+      };
+
+      this.eventEmitter.emit(EventNames.CONTRIBUTION_APPROVED, eventPayload);
+
+      return contribution;
+    } catch (error: any) {
+      if (error.code === 'P2025' || error.message === 'No Contribution found') {
+        throw new NotFoundException('CONTRIBUTION_NOT_FOUND');
+      }
+      if (error.message === 'CONTRIBUTION_NOT_IN_ROOM') {
+        throw new NotFoundException('CONTRIBUTION_NOT_FOUND');
+      }
+      if (error.message === 'CONTRIBUTION_ALREADY_PROCESSED') {
+        throw new BadRequestException('CONTRIBUTION_ALREADY_PROCESSED');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Rejects a contribution and emits an event.
+   */
+  async rejectContribution(roomId: string, id: string, adminId: string, reason?: string) {
+    try {
+      const contribution = await this.treasuryRepository.rejectContributionTx(roomId, id, adminId, reason);
+
+      const eventPayload: DomainEventEnvelope<ContributionRejectedPayload> = {
+        eventId: randomUUID(),
+        eventName: EventNames.CONTRIBUTION_REJECTED,
+        aggregateId: contribution.id,
+        roomId,
+        actorId: adminId,
+        occurredAt: new Date().toISOString(),
+        payload: {
+          contributionId: contribution.id,
+          roomId,
+          rejectedBy: adminId,
+          reason,
+        },
+        metadata: {
+          correlationId: randomUUID(),
+          sourceModule: 'treasury',
+        },
+      };
+
+      this.eventEmitter.emit(EventNames.CONTRIBUTION_REJECTED, eventPayload);
+
+      return contribution;
+    } catch (error: any) {
+      if (error.code === 'P2025' || error.message === 'No Contribution found') {
+        throw new NotFoundException('CONTRIBUTION_NOT_FOUND');
+      }
+      if (error.message === 'CONTRIBUTION_NOT_IN_ROOM') {
+        throw new NotFoundException('CONTRIBUTION_NOT_FOUND');
+      }
+      if (error.message === 'CONTRIBUTION_ALREADY_PROCESSED') {
+        throw new BadRequestException('CONTRIBUTION_ALREADY_PROCESSED');
+      }
+      throw error;
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Delete, Body, Param, Query, UseGuards, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Post, Get, Delete, Patch, Body, Param, Query, UseGuards, ParseUUIDPipe } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { TreasuryService } from '../services/treasury.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
@@ -12,6 +12,7 @@ import type { RoomContext } from '../../../common/types/room-context.type';
 import type { UserPayload } from '../../../common/types/user-payload.type';
 import { SubmitContributionDto } from '../dto/submit-contribution.dto';
 import { ListContributionsDto } from '../dto/list-contributions.dto';
+import { RejectContributionDto } from '../dto/reject-contribution.dto';
 
 @ApiTags('Contributions')
 @ApiBearerAuth()
@@ -67,6 +68,41 @@ export class ContributionController {
     return {
       success: true,
       message: 'Contribution cancelled successfully',
+      data: contribution,
+    };
+  }
+
+  @Patch(':id/approve')
+  @Roles(Role.ADMIN, Role.ACCOUNTANT)
+  @ApiOperation({ summary: 'Approve a pending contribution' })
+  @ApiResponse({ status: 200, description: 'Contribution approved successfully' })
+  async approveContribution(
+    @CurrentRoom() room: RoomContext,
+    @CurrentUser() user: UserPayload,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    const contribution = await this.treasuryService.approveContribution(room.id, id, user.sub);
+    return {
+      success: true,
+      message: 'Contribution approved successfully',
+      data: contribution,
+    };
+  }
+
+  @Patch(':id/reject')
+  @Roles(Role.ADMIN, Role.ACCOUNTANT)
+  @ApiOperation({ summary: 'Reject a pending contribution' })
+  @ApiResponse({ status: 200, description: 'Contribution rejected successfully' })
+  async rejectContribution(
+    @CurrentRoom() room: RoomContext,
+    @CurrentUser() user: UserPayload,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: RejectContributionDto,
+  ) {
+    const contribution = await this.treasuryService.rejectContribution(room.id, id, user.sub, dto.rejectionReason);
+    return {
+      success: true,
+      message: 'Contribution rejected successfully',
       data: contribution,
     };
   }

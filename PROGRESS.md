@@ -18,7 +18,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 - [x] **Phase 2** — Authentication & Profile Module
 - [x] **Phase 3** — Room Lifecycle & RBAC Module
 - [x] **Phase 4** — Treasury Pool & Contribution Workflow
-- [ ] **Phase 5** — Expense Tracking & Categories
+- [~] **Phase 5** — Expense Tracking & Categories
 - [ ] **Phase 6** — Reimbursement Payout Engine
 - [ ] **Phase 7** — In-App Notifications & Audit Trail
 - [ ] **Phase 8** — Production Hardening, Testing & Documentation
@@ -31,8 +31,8 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 5
-**Doing right now:** Starting Expense Workflow. Need to scaffold ExpenseModule and create ExpenseCategory endpoints.
-**Blocked by:** none
+**Doing right now:** Scaffolded CategoryModule and ExpenseModule, and implemented default categories seeding on `room.created`. Next: build endpoints.
+**Blocked by:** Local Docker daemon down (cannot verify side-effects against live DB).
 
 ---
 

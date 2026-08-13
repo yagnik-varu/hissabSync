@@ -11,6 +11,8 @@ import throttlerConfig from './config/throttler.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { RoomModule } from './modules/room/room.module';
 import { TreasuryModule } from './modules/treasury/treasury.module';
+import { CategoryModule } from './modules/category/category.module';
+import { ExpenseModule } from './modules/expense/expense.module';
 import { PrismaModule } from './database/prisma.module';
 
 @Module({
@@ -39,6 +41,8 @@ import { PrismaModule } from './database/prisma.module';
     AuthModule,
     RoomModule,
     TreasuryModule,
+    CategoryModule,
+    ExpenseModule,
   ],
   controllers: [AppController],
   providers: [AppService],

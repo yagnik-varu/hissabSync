@@ -31,7 +31,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 4
-**Doing right now:** Phase 4 complete (Ledger listing). Next: Phase 5 (Expense Workflow).
+**Doing right now:** Phase 4 complete (Treasury Adjustments). Next: Phase 5 (Expense Workflow).
 **Blocked by:** none
 
 ---

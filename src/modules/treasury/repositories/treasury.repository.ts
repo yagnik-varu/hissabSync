@@ -234,4 +234,39 @@ export class TreasuryRepository {
 
     return { data, totalItems };
   }
+
+  /**
+   * Creates a manual adjustment inside a single ACID transaction.
+   * Does NOT check Strict/Flexible bounds, since an admin is doing a forced reconciliation.
+   */
+  async createAdjustmentTx(roomId: string, adminId: string, transactionType: 'CREDIT' | 'DEBIT', amount: string, description: string) {
+    return this.prisma.$transaction(async (tx) => {
+      // 1. Ensure the treasury account exists & lock it
+      const treasury = await tx.treasuryAccount.findUniqueOrThrow({ where: { roomId } });
+      
+      // 2. Insert the immutable adjustment into the ledger
+      const transaction = await tx.treasuryTransaction.create({
+        data: {
+          roomId,
+          transactionType,
+          referenceType: 'ADJUSTMENT',
+          amount,
+          description,
+          createdBy: adminId,
+        }
+      });
+
+      // 3. Atomically update the balance
+      await tx.treasuryAccount.update({
+        where: { roomId },
+        data: { 
+          currentBalance: transactionType === 'CREDIT' 
+            ? { increment: amount } 
+            : { decrement: amount } 
+        }
+      });
+
+      return transaction;
+    });
+  }
 }

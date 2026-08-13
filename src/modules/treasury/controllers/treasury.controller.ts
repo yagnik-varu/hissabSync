@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { TreasuryService } from '../services/treasury.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
@@ -7,8 +7,11 @@ import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { Role } from '../../../common/enums/role.enum';
 import { CurrentRoom } from '../../../common/decorators/current-room.decorator';
+import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import type { RoomContext } from '../../../common/types/room-context.type';
+import type { UserPayload } from '../../../common/types/user-payload.type';
 import { ListTreasuryTransactionsDto } from '../dto/list-treasury-transactions.dto';
+import { CreateAdjustmentDto } from '../dto/create-adjustment.dto';
 
 @ApiTags('Treasury')
 @ApiBearerAuth()
@@ -45,6 +48,24 @@ export class TreasuryController {
       message: 'Treasury transactions retrieved successfully',
       data,
       meta,
+    };
+  }
+
+  @Post('adjustments')
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Create a manual treasury adjustment (Admin only)' })
+  @ApiResponse({ status: 201, description: 'Adjustment created successfully' })
+  async createAdjustment(
+    @CurrentRoom() room: RoomContext,
+    @CurrentUser() user: UserPayload,
+    @Body() dto: CreateAdjustmentDto,
+  ) {
+    const adjustment = await this.treasuryService.createAdjustment(room.id, user.sub, dto);
+    
+    return {
+      success: true,
+      message: 'Treasury adjustment created successfully',
+      data: adjustment,
     };
   }
 }

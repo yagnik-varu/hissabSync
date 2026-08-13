@@ -13,6 +13,8 @@ import type { ContributionRejectedPayload } from '../../../events/payloads/contr
 import { SubmitContributionDto } from '../dto/submit-contribution.dto';
 import { ListContributionsDto } from '../dto/list-contributions.dto';
 import { ListTreasuryTransactionsDto } from '../dto/list-treasury-transactions.dto';
+import { CreateAdjustmentDto } from '../dto/create-adjustment.dto';
+import type { TreasuryAdjustmentCreatedPayload } from '../../../events/payloads/treasury-adjustment-created.payload';
 
 @Injectable()
 export class TreasuryService {
@@ -283,5 +285,50 @@ export class TreasuryService {
         hasPreviousPage: filters.page > 1,
       }
     };
+  }
+
+  /**
+   * Creates a manual treasury adjustment and emits an event.
+   */
+  async createAdjustment(roomId: string, adminId: string, dto: CreateAdjustmentDto) {
+    try {
+      const transaction = await this.treasuryRepository.createAdjustmentTx(
+        roomId, 
+        adminId, 
+        dto.transactionType as 'CREDIT' | 'DEBIT', 
+        dto.amount, 
+        dto.description
+      );
+
+      const eventPayload: DomainEventEnvelope<TreasuryAdjustmentCreatedPayload> = {
+        eventId: randomUUID(),
+        eventName: EventNames.TREASURY_ADJUSTMENT_CREATED,
+        aggregateId: transaction.id,
+        roomId,
+        actorId: adminId,
+        occurredAt: new Date().toISOString(),
+        payload: {
+          transactionId: transaction.id,
+          roomId,
+          adminId,
+          transactionType: dto.transactionType as 'CREDIT' | 'DEBIT',
+          amount: dto.amount,
+          description: dto.description,
+        },
+        metadata: {
+          correlationId: randomUUID(),
+          sourceModule: 'treasury',
+        },
+      };
+
+      this.eventEmitter.emit(EventNames.TREASURY_ADJUSTMENT_CREATED, eventPayload);
+
+      return transaction;
+    } catch (error: any) {
+      if (error.code === 'P2025' || error.message === 'No TreasuryAccount found') {
+        throw new NotFoundException('TREASURY_ACCOUNT_NOT_FOUND');
+      }
+      throw error;
+    }
   }
 }

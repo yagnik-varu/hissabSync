@@ -137,6 +137,7 @@ export class RoomRepository {
           select: { 
             members: { where: { status: MemberStatus.ACTIVE } },
             contributions: { where: { status: 'PENDING' } },
+            expenses: { where: { status: 'PENDING' } },
           },
         },
       },

@@ -61,6 +61,7 @@ docs exactly, don't log it — that's the default, not news.
 - `room.created` event emitted even though no listeners exist yet — intentionally decoupled; Treasury and Category modules will subscribe later.
 - `expense_categories.category_id` uses `ON DELETE RESTRICT` (not CASCADE/SET NULL) because deleting a category must not orphan or destroy historical expenses, which would violate the immutable ledger (NFR-05). Categories in use cannot be deleted.
 - **Architectural Decision**: Kept "assert owner + assert PENDING" logic separated in `ExpenseService` and `TreasuryService` (for contribution cancellation) rather than creating a shared generic helper. This enforces strict module boundaries, preventing a generic helper from creating hidden coupling between independent aggregates.
+- Wired up `pendingExpensesCount` in `GET /rooms/:roomId` using Prisma's relation count features (`_count.expenses`), strictly replacing the temporary Phase 4 stub and dynamically reacting to live DB state without needing manual counter management.
 
 ---
 

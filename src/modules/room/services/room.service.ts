@@ -200,8 +200,7 @@ export class RoomService {
       myRole,
       memberCount: room._count.members,
       treasuryBalance: room.treasuryAccount?.currentBalance ?? '0.00',
-      // TODO (Phase 5): Stubbed count since Expense module doesn't exist yet
-      pendingExpensesCount: 0,
+      pendingExpensesCount: (room._count as any).expenses ?? 0,
       pendingContributionsCount: (room._count as any).contributions ?? 0,
       settings: {
         allowNegativeTreasury: room.settings?.allowNegativeTreasury,

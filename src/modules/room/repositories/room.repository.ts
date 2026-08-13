@@ -134,7 +134,10 @@ export class RoomRepository {
         settings: true,
         treasuryAccount: true,
         _count: {
-          select: { members: { where: { status: MemberStatus.ACTIVE } } },
+          select: { 
+            members: { where: { status: MemberStatus.ACTIVE } },
+            contributions: { where: { status: 'PENDING' } },
+          },
         },
       },
     });

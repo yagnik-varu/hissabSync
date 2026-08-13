@@ -17,7 +17,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 - [x] **Phase 1** — Project Foundation & Database Setup
 - [x] **Phase 2** — Authentication & Profile Module
 - [x] **Phase 3** — Room Lifecycle & RBAC Module
-- [~] **Phase 4** — Treasury Pool & Contribution Workflow
+- [x] **Phase 4** — Treasury Pool & Contribution Workflow
 - [ ] **Phase 5** — Expense Tracking & Categories
 - [ ] **Phase 6** — Reimbursement Payout Engine
 - [ ] **Phase 7** — In-App Notifications & Audit Trail
@@ -30,8 +30,8 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 
 ## 2. Current Focus
 
-**Active phase:** Phase 4
-**Doing right now:** Phase 4 complete (Treasury Adjustments). Next: Phase 5 (Expense Workflow).
+**Active phase:** Phase 5
+**Doing right now:** Starting Expense Workflow. Need to scaffold ExpenseModule and create ExpenseCategory endpoints.
 **Blocked by:** none
 
 ---
@@ -46,6 +46,7 @@ whole phase is finished — don't duplicate.
 | Phase 1 | Base setup, DB Schema, Seed Data, Swagger, ESLint, Global Filters/Pipes | Complete. Ready for Phase 2. |
 | Phase 2 | Authentication & Profile Module | Phase 2 done — full JWT lifecycle, `@nestjs/throttler` rate limiting, profile management, e2e and unit tests. See `src/modules/auth/`. |
 | Phase 3 | Room CRUD, memberships, shared enums, RBAC Guards | Complete. All room endpoints, RBAC pipelines (`RoomMemberGuard`, `RolesGuard`), join/leave requests, and role management are live. Unit and e2e tests implemented. Ready for Phase 4 (Treasury Module). |
+| Phase 4 | Treasury Pool & Contribution Workflow | Phase 4 done — `TreasuryTransaction` immutable ledger, Contribution workflow (Submit -> Approve/Reject/Cancel), manual adjustments, and row-locking logic. Ready for Phase 5. |
 
 ---
 

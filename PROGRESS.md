@@ -19,7 +19,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 - [x] **Phase 3** — Room Lifecycle & RBAC Module
 - [x] **Phase 4** — Treasury Pool & Contribution Workflow
 - [x] **Phase 5** — Expense Tracking & Categories
-- [ ] **Phase 6** — Reimbursement Payout Engine
+- [~] **Phase 6** — Reimbursement Payout Engine
 - [ ] **Phase 7** — In-App Notifications & Audit Trail
 - [ ] **Phase 8** — Production Hardening, Testing & Documentation
 
@@ -30,9 +30,9 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 
 ## 2. Current Focus
 
-**Active phase:** Phase 5
-**Doing right now:** Phase 5 (Expenses) is now fully complete (CRUD, cancellation, and approval/rejection). Next: Phase 6 (Reimbursements).
-**Blocked by:** Local Docker daemon down (cannot verify side-effects against live DB).
+**Active phase:** Phase 6
+**Doing right now:** Phase 6 (Reimbursements) is ready to start. ReimbursementModule will listen for `expense.approved` to auto-create records, and payout endpoints will use Strict/Flexible treasury checks.
+**Blocked by:** Local Docker daemon down (cannot verify side-effects against live DB or run integration tests).
 
 ---
 
@@ -47,6 +47,7 @@ whole phase is finished — don't duplicate.
 | Phase 2 | Authentication & Profile Module | Phase 2 done — full JWT lifecycle, `@nestjs/throttler` rate limiting, profile management, e2e and unit tests. See `src/modules/auth/`. |
 | Phase 3 | Room CRUD, memberships, shared enums, RBAC Guards | Complete. All room endpoints, RBAC pipelines (`RoomMemberGuard`, `RolesGuard`), join/leave requests, and role management are live. Unit and e2e tests implemented. Ready for Phase 4 (Treasury Module). |
 | Phase 4 | Treasury Pool & Contribution Workflow | Phase 4 done — `TreasuryTransaction` immutable ledger, Contribution workflow (Submit -> Approve/Reject/Cancel), manual adjustments, and row-locking logic. Ready for Phase 5. |
+| Phase 5 | Expense Tracking & Categories | Phase 5 done — Category CRUD, Expense workflow (Submit -> Approve/Reject/Cancel), Unit & e2e tests written. Ready for Phase 6. |
 
 ---
 

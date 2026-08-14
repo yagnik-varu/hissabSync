@@ -13,6 +13,7 @@ import { RoomModule } from './modules/room/room.module';
 import { TreasuryModule } from './modules/treasury/treasury.module';
 import { CategoryModule } from './modules/category/category.module';
 import { ExpenseModule } from './modules/expense/expense.module';
+import { ReimbursementModule } from './modules/reimbursement/reimbursement.module';
 import { PrismaModule } from './database/prisma.module';
 
 @Module({
@@ -43,6 +44,7 @@ import { PrismaModule } from './database/prisma.module';
     TreasuryModule,
     CategoryModule,
     ExpenseModule,
+    ReimbursementModule,
   ],
   controllers: [AppController],
   providers: [AppService],

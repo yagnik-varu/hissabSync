@@ -31,8 +31,8 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 6
-**Doing right now:** Phase 6 (Reimbursements) is ready to start. ReimbursementModule will listen for `expense.approved` to auto-create records, and payout endpoints will use Strict/Flexible treasury checks.
-**Blocked by:** Local Docker daemon down (cannot verify side-effects against live DB or run integration tests).
+**Doing right now:** Implemented `ReimbursementModule` scaffolding and the `expense.approved` event listener that auto-creates a `PENDING_PAYMENT` Reimbursement.
+**Blocked by:** Local Docker daemon down (cannot run full integration tests locally, though e2e flow is conceptually wired).
 
 ---
 

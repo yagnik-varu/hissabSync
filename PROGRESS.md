@@ -28,7 +28,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 7
-**Doing right now:** Scaffolded the `NotificationModule` and `AuditModule`. Implemented the core generic capabilities and database repositories for both (`NotificationService.create()` and `AuditService.record()`).
+**Doing right now:** Wired `@OnEvent` listeners in `NotificationModule` for all major domain events (room joins, expenses, contributions, reimbursements) to trigger notifications automatically without altering core business logic.
 **Blocked by:** None.
 
 ---

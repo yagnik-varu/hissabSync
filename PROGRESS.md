@@ -31,7 +31,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 6
-**Doing right now:** Implemented `ReimbursementModule` scaffolding and the `expense.approved` event listener that auto-creates a `PENDING_PAYMENT` Reimbursement.
+**Doing right now:** Implemented ReimbursementModule scaffolding, event listener, and GET endpoints (list & details). Next is Reimbursement payout endpoint.
 **Blocked by:** Local Docker daemon down (cannot run full integration tests locally, though e2e flow is conceptually wired).
 
 ---

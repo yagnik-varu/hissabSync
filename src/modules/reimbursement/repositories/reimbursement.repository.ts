@@ -21,4 +21,65 @@ export class ReimbursementRepository {
       },
     });
   }
+
+  async findMany(
+    roomId: string,
+    params: {
+      status?: any;
+      beneficiaryId?: string;
+      skip: number;
+      take: number;
+    }
+  ) {
+    const where: any = { roomId };
+    
+    if (params.status) {
+      where.status = params.status;
+    }
+    
+    if (params.beneficiaryId) {
+      where.beneficiaryId = params.beneficiaryId;
+    }
+
+    const [items, total] = await Promise.all([
+      this.prisma.reimbursement.findMany({
+        where,
+        skip: params.skip,
+        take: params.take,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          beneficiary: {
+            select: { id: true, fullName: true, profileImageUrl: true }
+          },
+          expense: {
+            select: { id: true, title: true, amount: true, category: { select: { id: true, name: true } } }
+          }
+        }
+      }),
+      this.prisma.reimbursement.count({ where }),
+    ]);
+
+    return { items, total };
+  }
+
+  async findById(roomId: string, reimbursementId: string) {
+    return this.prisma.reimbursement.findUnique({
+      where: {
+        id: reimbursementId,
+        roomId: roomId,
+      },
+      include: {
+        beneficiary: {
+          select: { id: true, fullName: true, profileImageUrl: true }
+        },
+        expense: {
+          select: { id: true, title: true, amount: true, category: { select: { id: true, name: true } } }
+        },
+        payer: {
+          select: { id: true, fullName: true }
+        }
+      }
+    });
+  }
 }
+

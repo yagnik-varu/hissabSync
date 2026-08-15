@@ -28,7 +28,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 7
-**Doing right now:** Scaffolding the `NotificationModule`. Implemented the core `NotificationService.create()` generic capability and its database repository. Confirmed row creation with an E2E test.
+**Doing right now:** Scaffolded the `NotificationModule` and `AuditModule`. Implemented the core generic capabilities and database repositories for both (`NotificationService.create()` and `AuditService.record()`).
 **Blocked by:** None.
 
 ---

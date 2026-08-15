@@ -72,4 +72,50 @@ export class AuditRepository {
 
     return { total, data };
   }
+
+  /**
+   * Fetches the detailed audit logs for a room (Admin only).
+   * Supports filtering by entityType and date range.
+   */
+  async getRoomAuditLogs(
+    roomId: string,
+    entityType?: string,
+    dateFrom?: Date,
+    dateTo?: Date,
+    skip: number = 0,
+    take: number = 20,
+  ) {
+    const where: Prisma.AuditLogWhereInput = {
+      roomId,
+      ...(entityType ? { entityType } : {}),
+      ...(dateFrom || dateTo
+        ? {
+            createdAt: {
+              ...(dateFrom ? { gte: dateFrom } : {}),
+              ...(dateTo ? { lte: dateTo } : {}),
+            },
+          }
+        : {}),
+    };
+
+    const [total, data] = await Promise.all([
+      this.prisma.auditLog.count({ where }),
+      this.prisma.auditLog.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take,
+        include: {
+          actor: {
+            select: {
+              id: true,
+              fullName: true,
+            },
+          },
+        },
+      }),
+    ]);
+
+    return { total, data };
+  }
 }

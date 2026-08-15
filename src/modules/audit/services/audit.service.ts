@@ -87,4 +87,50 @@ export class AuditService {
       },
     };
   }
+
+  /**
+   * Retrieves full detailed audit logs for a room.
+   * This includes the raw `metadata` and is strictly meant for Admin access.
+   */
+  async getRoomAuditLogs(
+    roomId: string,
+    entityType?: string,
+    dateFrom?: Date,
+    dateTo?: Date,
+    page: number = 1,
+    limit: number = 20,
+  ) {
+    const skip = (page - 1) * limit;
+    const { total, data } = await this.auditRepo.getRoomAuditLogs(
+      roomId,
+      entityType,
+      dateFrom,
+      dateTo,
+      skip,
+      limit,
+    );
+
+    const mappedData = data.map((log) => ({
+      id: log.id,
+      action: log.action,
+      entityType: log.entityType,
+      entityId: log.entityId,
+      createdAt: log.createdAt,
+      actor: {
+        id: log.actor.id,
+        fullName: log.actor.fullName,
+      },
+      metadata: log.metadata,
+    }));
+
+    return {
+      data: mappedData,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
 }

@@ -28,4 +28,48 @@ export class AuditRepository {
       },
     });
   }
+
+  /**
+   * Fetches the activity feed for a room, paginated and chronologically ordered.
+   * Joins the actor to get their name for member-friendly display.
+   */
+  async getRoomActivityFeed(
+    roomId: string,
+    dateFrom?: Date,
+    dateTo?: Date,
+    skip: number = 0,
+    take: number = 20,
+  ) {
+    const where: Prisma.AuditLogWhereInput = {
+      roomId,
+      ...(dateFrom || dateTo
+        ? {
+            createdAt: {
+              ...(dateFrom ? { gte: dateFrom } : {}),
+              ...(dateTo ? { lte: dateTo } : {}),
+            },
+          }
+        : {}),
+    };
+
+    const [total, data] = await Promise.all([
+      this.prisma.auditLog.count({ where }),
+      this.prisma.auditLog.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take,
+        include: {
+          actor: {
+            select: {
+              id: true,
+              fullName: true,
+            },
+          },
+        },
+      }),
+    ]);
+
+    return { total, data };
+  }
 }

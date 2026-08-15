@@ -30,4 +30,61 @@ export class AuditService {
     this.logger.log(`Recording audit log: [${entityType}] ${action} by user ${actorId}`);
     return this.auditRepo.createAuditLog(actorId, roomId, entityType, entityId, action, metadata);
   }
+
+  /**
+   * Retrieves a chronological activity feed for a specific room.
+   * Explicitly strips sensitive raw `metadata` before returning to prevent 
+   * leaking admin-only details (like exact row locks, detailed rejections, or IP logs)
+   * to standard members.
+   */
+  async getRoomActivityFeed(
+    roomId: string,
+    dateFrom?: Date,
+    dateTo?: Date,
+    page: number = 1,
+    limit: number = 20,
+  ) {
+    const skip = (page - 1) * limit;
+    const { total, data } = await this.auditRepo.getRoomActivityFeed(
+      roomId,
+      dateFrom,
+      dateTo,
+      skip,
+      limit,
+    );
+
+    const mappedData = data.map((log) => {
+      // Safely extract explicit fields we want to show, if any, from metadata
+      // For now, we only expose the amount if it exists, stripping everything else.
+      const safeDetails: Record<string, any> = {};
+      if (log.metadata && typeof log.metadata === 'object' && !Array.isArray(log.metadata)) {
+        if ('amount' in log.metadata) {
+          safeDetails.amount = log.metadata.amount;
+        }
+      }
+
+      return {
+        id: log.id,
+        action: log.action,
+        entityType: log.entityType,
+        entityId: log.entityId,
+        createdAt: log.createdAt,
+        actor: {
+          id: log.actor.id,
+          fullName: log.actor.fullName,
+        },
+        details: safeDetails,
+      };
+    });
+
+    return {
+      data: mappedData,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
 }

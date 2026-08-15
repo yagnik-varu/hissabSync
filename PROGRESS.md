@@ -46,7 +46,7 @@ whole phase is finished — don't duplicate.
 | Phase 4 | Treasury Pool & Contribution Workflow | Phase 4 done — `TreasuryTransaction` immutable ledger, Contribution workflow (Submit -> Approve/Reject/Cancel), manual adjustments, and row-locking logic. Ready for Phase 5. |
 | Phase 5 | Expense Tracking & Categories | Phase 5 done — Category CRUD, Expense workflow (Submit -> Approve/Reject/Cancel), Unit & e2e tests written. Ready for Phase 6. |
 | Phase 6 | Reimbursement Payout Engine | Phase 6 done — Reimbursement list/details, and the payout transaction engine with strict/flexible modes. Ready for Phase 7. |
-| Phase 7 | In-App Notifications & Audit Trail | Live `@OnEvent` listeners for both `NotificationModule` and `AuditModule`. Built `GET /notifications` and `PATCH /notifications/:id/read` for users. |
+| Phase 7 | In-App Notifications & Audit Trail | Live `@OnEvent` listeners for both `NotificationModule` and `AuditModule`. Built `GET /notifications`, `PATCH /notifications/:id/read`, and `GET /rooms/:roomId/activity` feed based on AuditLogs. |
 
 ---
 
@@ -64,6 +64,7 @@ docs exactly, don't log it — that's the default, not news.
 - Wired up `pendingExpensesCount` in `GET /rooms/:roomId` using Prisma's relation count features (`_count.expenses`), strictly replacing the temporary Phase 4 stub and dynamically reacting to live DB state without needing manual counter management.
 - **Spec Ambiguity**: `docs/02-domain-model.md` lists `REJECTED` in the `Reimbursement` status enum, but `docs/06-api-design.md` Section 7 defines no endpoint to reject a reimbursement. Following the strict rule to not invent undocumented endpoints, the `REJECTED` status is left unimplemented for V1 (treat as a dead enum value / V2 placeholder).
 - **Full E2E Walkthrough Insight (Phases 4-6)**: Successfully verified the full end-to-end flow via a Node.js test script hitting the live API. The script confirmed that the Strict Mode correctly blocks `TREASURY_INSUFFICIENT_BALANCE` and succeeds after a top-up contribution. **Key Finding**: Because `expense.approved` triggers Reimbursement creation asynchronously (`{ async: true }` in `@OnEvent`), there is a minor race condition where querying `GET /reimbursements` immediately (within ms) after approving an expense might return empty. Frontends must either poll, rely on WebSockets/Notifications, or allow a minor delay. Unit tests would not have caught this as they typically mock the event emitter synchronously.
+- **Architectural Decision (Audit Timeline)**: Sourced `GET /rooms/:roomId/activity` from `AuditLog` since it inherently acts as a chronological timeline of domain events. To prevent leaking admin-only details to standard members, the `AuditService` explicitly strips raw `metadata` when querying the activity feed, returning only safe fields (like `amount`).
 
 ---
 

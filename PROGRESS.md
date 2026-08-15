@@ -20,15 +20,15 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 - [x] **Phase 4** — Treasury Pool & Contribution Workflow
 - [x] **Phase 5** — Expense Tracking & Categories
 - [x] **Phase 6** — Reimbursement Payout Engine
-- [ ] **Phase 7** — In-App Notifications & Audit Trail
+- [x] **Phase 7** — In-App Notifications & Audit Trail
 - [ ] **Phase 8** — Production Hardening, Testing & Documentation
 
 ---
 
 ## 2. Current Focus
 
-**Active phase:** Phase 7
-**Doing right now:** Wired `@OnEvent` listeners in `AuditModule` for administrative and financial events (contributions, expenses, reimbursements, treasury adjustments, and role updates) to capture detailed audit logs. This completes the core event-driven side-effects for Phase 7.
+**Active phase:** Phase 8
+**Doing right now:** Preparing for Phase 8: rate limiting beyond auth, health checks, full E2E suite, Docker production config, and documentation.
 **Blocked by:** None.
 
 ---
@@ -46,7 +46,7 @@ whole phase is finished — don't duplicate.
 | Phase 4 | Treasury Pool & Contribution Workflow | Phase 4 done — `TreasuryTransaction` immutable ledger, Contribution workflow (Submit -> Approve/Reject/Cancel), manual adjustments, and row-locking logic. Ready for Phase 5. |
 | Phase 5 | Expense Tracking & Categories | Phase 5 done — Category CRUD, Expense workflow (Submit -> Approve/Reject/Cancel), Unit & e2e tests written. Ready for Phase 6. |
 | Phase 6 | Reimbursement Payout Engine | Phase 6 done — Reimbursement list/details, and the payout transaction engine with strict/flexible modes. Ready for Phase 7. |
-| Phase 7 | In-App Notifications & Audit Trail | Live `@OnEvent` listeners for both `NotificationModule` and `AuditModule`. Built `GET /notifications`, `PATCH /notifications/:id/read`, `GET /rooms/:roomId/activity` feed, and `GET /rooms/:roomId/audit-logs` (Admin only). |
+| Phase 7 | In-App Notifications & Audit Trail | Phase 7 done — Event listeners for Notification and Audit modules, `GET /notifications`, `GET /rooms/:roomId/activity`, `GET /rooms/:roomId/audit-logs`. Full E2E flow verified. Ready for Phase 8. |
 
 ---
 

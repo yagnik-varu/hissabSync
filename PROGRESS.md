@@ -28,7 +28,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 7
-**Doing right now:** Wired `@OnEvent` listeners in `NotificationModule` for all major domain events (room joins, expenses, contributions, reimbursements) to trigger notifications automatically without altering core business logic.
+**Doing right now:** Wired `@OnEvent` listeners in `AuditModule` for administrative and financial events (contributions, expenses, reimbursements, treasury adjustments, and role updates) to capture detailed audit logs. This completes the core event-driven side-effects for Phase 7.
 **Blocked by:** None.
 
 ---

@@ -46,6 +46,7 @@ whole phase is finished — don't duplicate.
 | Phase 4 | Treasury Pool & Contribution Workflow | Phase 4 done — `TreasuryTransaction` immutable ledger, Contribution workflow (Submit -> Approve/Reject/Cancel), manual adjustments, and row-locking logic. Ready for Phase 5. |
 | Phase 5 | Expense Tracking & Categories | Phase 5 done — Category CRUD, Expense workflow (Submit -> Approve/Reject/Cancel), Unit & e2e tests written. Ready for Phase 6. |
 | Phase 6 | Reimbursement Payout Engine | Phase 6 done — Reimbursement list/details, and the payout transaction engine with strict/flexible modes. Ready for Phase 7. |
+| Phase 7 | In-App Notifications & Audit Trail | Live `@OnEvent` listeners for both `NotificationModule` and `AuditModule`. Built `GET /notifications` and `PATCH /notifications/:id/read` for users. |
 
 ---
 

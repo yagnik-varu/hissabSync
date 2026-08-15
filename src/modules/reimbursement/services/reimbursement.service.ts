@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { OnEvent, EventEmitter2 } from '@nestjs/event-emitter';
 import { ReimbursementRepository } from '../repositories/reimbursement.repository';
 import { EventNames } from '../../../events/event-names';
@@ -91,5 +91,66 @@ export class ReimbursementService {
     }
 
     return reimbursement;
+  }
+
+  async payReimbursement(roomId: string, reimbursementId: string, paidBy: string) {
+    try {
+      const { reimbursement, treasuryNewBalance } = await this.reimbursementRepository.payReimbursementTx(roomId, reimbursementId, paidBy);
+
+      // Emit domain event
+      const eventPayload: DomainEventEnvelope<any> = {
+        eventId: randomUUID(),
+        eventName: EventNames.REIMBURSEMENT_PAID,
+        aggregateId: reimbursement.id,
+        roomId: roomId,
+        actorId: paidBy,
+        occurredAt: new Date().toISOString(),
+        payload: {
+          reimbursementId: reimbursement.id,
+          roomId: roomId,
+          paidBy: paidBy,
+          amount: reimbursement.amount.toString(),
+        },
+        metadata: {
+          correlationId: randomUUID(),
+          sourceModule: 'reimbursement',
+        },
+      };
+
+      this.eventEmitter.emit(EventNames.REIMBURSEMENT_PAID, eventPayload);
+
+      return {
+        id: reimbursement.id,
+        status: reimbursement.status,
+        paidAt: reimbursement.paidAt,
+        treasuryNewBalance: treasuryNewBalance.toFixed(2),
+      };
+    } catch (error: any) {
+      if (error.code === 'P2025' || error.message.includes('No Reimbursement found')) {
+        throw new NotFoundException({
+          code: 'REIMBURSEMENT_NOT_FOUND',
+          message: 'Reimbursement record not found.',
+        });
+      }
+      if (error.message === 'Reimbursement does not belong to this room') {
+        throw new NotFoundException({
+          code: 'REIMBURSEMENT_NOT_FOUND',
+          message: 'Reimbursement record not found.',
+        });
+      }
+      if (error.message === 'REIMBURSEMENT_ALREADY_PAID') {
+        throw new ConflictException({
+          code: 'REIMBURSEMENT_ALREADY_PAID',
+          message: 'Reimbursement has already been paid out.',
+        });
+      }
+      if (error.message === 'TREASURY_INSUFFICIENT_BALANCE') {
+        throw new BadRequestException({
+          code: 'TREASURY_INSUFFICIENT_BALANCE',
+          message: 'Treasury balance is insufficient to process this reimbursement payout.',
+        });
+      }
+      throw error;
+    }
   }
 }

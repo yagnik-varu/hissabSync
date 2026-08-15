@@ -61,6 +61,7 @@ docs exactly, don't log it — that's the default, not news.
 - `expense_categories.category_id` uses `ON DELETE RESTRICT` (not CASCADE/SET NULL) because deleting a category must not orphan or destroy historical expenses, which would violate the immutable ledger (NFR-05). Categories in use cannot be deleted.
 - **Architectural Decision**: Kept "assert owner + assert PENDING" logic separated in `ExpenseService` and `TreasuryService` (for contribution cancellation) rather than creating a shared generic helper. This enforces strict module boundaries, preventing a generic helper from creating hidden coupling between independent aggregates.
 - Wired up `pendingExpensesCount` in `GET /rooms/:roomId` using Prisma's relation count features (`_count.expenses`), strictly replacing the temporary Phase 4 stub and dynamically reacting to live DB state without needing manual counter management.
+- **Spec Ambiguity**: `docs/02-domain-model.md` lists `REJECTED` in the `Reimbursement` status enum, but `docs/06-api-design.md` Section 7 defines no endpoint to reject a reimbursement. Following the strict rule to not invent undocumented endpoints, the `REJECTED` status is left unimplemented for V1 (treat as a dead enum value / V2 placeholder).
 
 ---
 

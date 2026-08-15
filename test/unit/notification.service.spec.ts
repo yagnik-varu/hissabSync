@@ -57,7 +57,7 @@ describe('Notification Module', () => {
 
   describe('NotificationListener', () => {
     it('handleExpenseSubmitted should notify admins and accountants', async () => {
-      prisma.roomMember.findMany.mockResolvedValue([
+      (prisma.roomMember.findMany as jest.Mock).mockResolvedValue([
         { userId: 'admin-1' },
         { userId: 'acc-1' }
       ] as any);
@@ -94,7 +94,7 @@ describe('Notification Module', () => {
     });
 
     it('handleReimbursementPaid should notify beneficiary', async () => {
-      prisma.reimbursement.findUnique.mockResolvedValue({ beneficiaryId: 'user-2', amount: '250' } as any);
+      (prisma.reimbursement.findUnique as jest.Mock).mockResolvedValue({ beneficiaryId: 'user-2', amount: '250' } as any);
 
       const envelope: any = {
         roomId: 'room-1',

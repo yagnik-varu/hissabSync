@@ -27,9 +27,9 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 
 ## 2. Current Focus
 
-**Active phase:** Phase 6
-**Doing right now:** Phase 6 complete. Reimbursement endpoints including the payout engine with strict/flexible modes and lock handling are implemented.
-**Blocked by:** Local Docker daemon down (cannot run full integration tests locally, though e2e flow is conceptually wired).
+**Active phase:** Phase 7
+**Doing right now:** Phase 6 complete. Reimbursement payouts, concurrency/row-locking (Strict/Flexible modes), and E2E tests are implemented and passing. Ready to start Phase 7 (Notifications & Audit).
+**Blocked by:** None.
 
 ---
 

@@ -83,10 +83,11 @@ export class ReimbursementRepository {
   }
   async payReimbursementTx(roomId: string, reimbursementId: string, paidBy: string) {
     return this.prisma.$transaction(async (tx) => {
-      // 1. Lock room settings & treasury account row
-      const treasury = await tx.treasuryAccount.findUniqueOrThrow({ where: { roomId } });
-      const settings = await tx.roomSettings.findUniqueOrThrow({ where: { roomId } });
-      const reimbursement = await tx.reimbursement.findUniqueOrThrow({ where: { id: reimbursementId } });
+      // 1. Lock reimbursement and treasury account rows explicitly using FOR UPDATE
+      // This forces concurrent transactions to queue and read the committed state of the winner.
+      const reimbRows = await tx.$queryRaw<any[]>`SELECT "id", "status", "room_id" as "roomId", "amount", "beneficiary_id" as "beneficiaryId" FROM "reimbursements" WHERE "id" = ${reimbursementId}::uuid FOR UPDATE`;
+      if (!reimbRows.length) throw new Error('No Reimbursement found');
+      const reimbursement = reimbRows[0];
 
       if (reimbursement.roomId !== roomId) {
         throw new Error('Reimbursement does not belong to this room');
@@ -96,8 +97,18 @@ export class ReimbursementRepository {
         throw new Error('REIMBURSEMENT_ALREADY_PAID');
       }
 
+      const treasuryRows = await tx.$queryRaw<any[]>`SELECT "current_balance" as "currentBalance" FROM "treasury_accounts" WHERE "room_id" = ${roomId}::uuid FOR UPDATE`;
+      if (!treasuryRows.length) throw new Error('Treasury account not found');
+      const treasury = treasuryRows[0];
+
+      const settings = await tx.roomSettings.findUniqueOrThrow({ where: { roomId } });
+
       // 2. Check balance in Strict Mode
-      if (!settings.allowNegativeTreasury && treasury.currentBalance.lessThan(reimbursement.amount)) {
+      // Using Prisma.Decimal for safe math since raw query returns a Decimal-like object or string in pg
+      const currentBalance = Number(treasury.currentBalance);
+      const amount = Number(reimbursement.amount);
+
+      if (!settings.allowNegativeTreasury && currentBalance < amount) {
         throw new Error('TREASURY_INSUFFICIENT_BALANCE');
       }
 

@@ -14,6 +14,7 @@ import { TreasuryModule } from './modules/treasury/treasury.module';
 import { CategoryModule } from './modules/category/category.module';
 import { ExpenseModule } from './modules/expense/expense.module';
 import { ReimbursementModule } from './modules/reimbursement/reimbursement.module';
+import { NotificationModule } from './modules/notification/notification.module';
 import { PrismaModule } from './database/prisma.module';
 
 @Module({
@@ -45,6 +46,7 @@ import { PrismaModule } from './database/prisma.module';
     CategoryModule,
     ExpenseModule,
     ReimbursementModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

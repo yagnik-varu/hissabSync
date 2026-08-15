@@ -28,7 +28,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 7
-**Doing right now:** Phase 6 complete. Reimbursement payouts, concurrency/row-locking (Strict/Flexible modes), and E2E tests are implemented and passing. Ready to start Phase 7 (Notifications & Audit).
+**Doing right now:** Scaffolding the `NotificationModule`. Implemented the core `NotificationService.create()` generic capability and its database repository. Confirmed row creation with an E2E test.
 **Blocked by:** None.
 
 ---

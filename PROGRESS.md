@@ -28,7 +28,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 8
-**Doing right now:** Extended rate limiting to sensitive write operations (financial approvals, treasury adjustments, role changes).
+**Doing right now:** Added GET /health endpoint for infrastructure monitoring. Preparing full E2E suite and Docker production config.
 **Blocked by:** None.
 
 ---
@@ -67,6 +67,7 @@ docs exactly, don't log it — that's the default, not news.
 - **Architectural Decision (Audit Timeline)**: Sourced `GET /rooms/:roomId/activity` from `AuditLog` since it inherently acts as a chronological timeline of domain events. To prevent leaking admin-only details to standard members, the `AuditService` explicitly strips raw `metadata` when querying the activity feed, returning only safe fields (like `amount`).
 - **Architectural Decision (Audit Logs Endpoint)**: Added `GET /rooms/:roomId/audit-logs` restricted to `@Roles(Role.ADMIN)` to satisfy the `docs/07-rbac-design.md` requirement ("View Detailed Audit Logs"). This endpoint was not explicitly listed in `docs/06-api-design.md`. This differs from our treatment of the undocumented `REJECTED` reimbursement status (which we ignored) because an RBAC capability explicitly demands a way for an Admin to exercise it (a required feature), whereas a dangling enum value represents an incomplete future state with no active system requirement depending on it. We chose the route `/rooms/:roomId/audit-logs` to align with the RESTful structure of the room module.
 - **Architectural Decision (Rate Limiting on Privileged Routes)**: Applied stricter `@Throttle()` overrides (10 requests/min) to sensitive write endpoints (e.g., expense/contribution approvals, treasury adjustments, reimbursement payouts, member role changes). While RBAC restricts these to Admins/Accountants, and row-locking prevents database race conditions, throttling is still necessary. It provides defense-in-depth against resource exhaustion from rapid-fire spam (e.g., frontend double-click bugs or malicious scripts) and limits the blast radius if a privileged account is compromised.
+- **Architectural Decision (Public Health Endpoint)**: Implemented `GET /health` using `@nestjs/terminus` (DB and Memory checks) and explicitly marked it `@Public()`, bypassing `JwtAuthGuard`. If `/health` required a Bearer token, infrastructure tools (like AWS Target Groups, Kubernetes probes, or Docker healthchecks) would be unable to poll it, causing load balancers to falsely mark the service as dead and repeatedly terminate the container, resulting in a production outage.
 
 ---
 

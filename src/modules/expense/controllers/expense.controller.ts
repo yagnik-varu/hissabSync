@@ -7,6 +7,7 @@ import { ListExpensesDto } from '../dto/list-expenses.dto';
 import { RejectExpenseDto } from '../dto/reject-expense.dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RoomMemberGuard } from '../../../common/guards/room-member.guard';
+import { RoomNotArchivedGuard } from '../../../common/guards/room-not-archived.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { Role } from '../../../common/enums/role.enum';
@@ -51,6 +52,7 @@ export class ExpenseController {
       },
     },
   })
+  @UseGuards(RoomNotArchivedGuard)
   @ApiResponse({ status: 404, description: 'Category not found' })
   async submitExpense(
     @CurrentRoom() room: RoomContext,
@@ -97,6 +99,7 @@ export class ExpenseController {
     };
   }
 
+  @UseGuards(RoomNotArchivedGuard)
   @Delete(':id')
   @ApiOperation({ summary: 'Cancel a pending expense (submitter only)' })
   @ApiResponse({ status: 200, description: 'Expense cancelled successfully' })
@@ -117,7 +120,7 @@ export class ExpenseController {
   }
 
   @Patch(':id/approve')
-  @UseGuards(RolesGuard, ThrottlerGuard)
+  @UseGuards(RolesGuard, ThrottlerGuard, RoomNotArchivedGuard)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Roles(Role.ADMIN, Role.ACCOUNTANT)
   @ApiOperation({ summary: 'Approve an expense' })
@@ -155,7 +158,7 @@ export class ExpenseController {
   }
 
   @Patch(':id/reject')
-  @UseGuards(RolesGuard, ThrottlerGuard)
+  @UseGuards(RolesGuard, ThrottlerGuard, RoomNotArchivedGuard)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Roles(Role.ADMIN, Role.ACCOUNTANT)
   @ApiOperation({ summary: 'Reject an expense' })

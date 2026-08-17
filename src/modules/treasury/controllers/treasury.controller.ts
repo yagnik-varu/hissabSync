@@ -4,6 +4,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { TreasuryService } from '../services/treasury.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RoomMemberGuard } from '../../../common/guards/room-member.guard';
+import { RoomNotArchivedGuard } from '../../../common/guards/room-not-archived.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { Role } from '../../../common/enums/role.enum';
@@ -53,7 +54,7 @@ export class TreasuryController {
   }
 
   @Post('adjustments')
-  @UseGuards(ThrottlerGuard)
+  @UseGuards(ThrottlerGuard, RoomNotArchivedGuard)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Create a manual treasury adjustment (Admin only)' })

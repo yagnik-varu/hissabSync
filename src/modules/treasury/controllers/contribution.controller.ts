@@ -4,6 +4,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { TreasuryService } from '../services/treasury.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RoomMemberGuard } from '../../../common/guards/room-member.guard';
+import { RoomNotArchivedGuard } from '../../../common/guards/room-not-archived.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { Role } from '../../../common/enums/role.enum';
@@ -22,6 +23,7 @@ import { RejectContributionDto } from '../dto/reject-contribution.dto';
 export class ContributionController {
   constructor(private readonly treasuryService: TreasuryService) {}
 
+  @UseGuards(RoomNotArchivedGuard)
   @Post()
   @Roles(Role.ADMIN, Role.ACCOUNTANT, Role.MEMBER)
   @ApiOperation({ summary: 'Submit a new contribution' })
@@ -56,6 +58,7 @@ export class ContributionController {
     };
   }
 
+  @UseGuards(RoomNotArchivedGuard)
   @Delete(':id')
   @Roles(Role.ADMIN, Role.ACCOUNTANT, Role.MEMBER)
   @ApiOperation({ summary: 'Cancel a pending contribution' })
@@ -74,7 +77,7 @@ export class ContributionController {
   }
 
   @Patch(':id/approve')
-  @UseGuards(ThrottlerGuard)
+  @UseGuards(ThrottlerGuard, RoomNotArchivedGuard)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Roles(Role.ADMIN, Role.ACCOUNTANT)
   @ApiOperation({ summary: 'Approve a pending contribution' })
@@ -93,7 +96,7 @@ export class ContributionController {
   }
 
   @Patch(':id/reject')
-  @UseGuards(ThrottlerGuard)
+  @UseGuards(ThrottlerGuard, RoomNotArchivedGuard)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Roles(Role.ADMIN, Role.ACCOUNTANT)
   @ApiOperation({ summary: 'Reject a pending contribution' })

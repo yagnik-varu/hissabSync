@@ -17,6 +17,7 @@ import { RoomService } from '../services/room.service';
 import { CreateRoomDto } from '../dto/create-room.dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RoomMemberGuard } from '../../../common/guards/room-member.guard';
+import { RoomNotArchivedGuard } from '../../../common/guards/room-not-archived.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { CurrentRoom } from '../../../common/decorators/current-room.decorator';
@@ -150,7 +151,7 @@ export class RoomController {
    * Requires ADMIN role.
    */
   @Patch(':roomId')
-  @UseGuards(JwtAuthGuard, RoomMemberGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RoomMemberGuard, RolesGuard, RoomNotArchivedGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update room info & settings' })

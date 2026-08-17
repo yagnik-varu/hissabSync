@@ -5,6 +5,7 @@ import { ReimbursementService } from '../services/reimbursement.service';
 import { ListReimbursementsDto } from '../dtos/list-reimbursements.dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RoomMemberGuard } from '../../../common/guards/room-member.guard';
+import { RoomNotArchivedGuard } from '../../../common/guards/room-not-archived.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { Role } from '../../../common/enums/role.enum';
@@ -53,7 +54,7 @@ export class ReimbursementController {
   }
 
   @Patch(':id/pay')
-  @UseGuards(ThrottlerGuard)
+  @UseGuards(ThrottlerGuard, RoomNotArchivedGuard)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Roles(Role.ADMIN, Role.ACCOUNTANT)
   @ApiOperation({ summary: 'Mark Reimbursement as Paid' })

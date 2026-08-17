@@ -221,7 +221,7 @@ export class RoomService {
       });
     }
 
-    if (room.status === RoomStatus.ARCHIVED) {
+    if (room.status === RoomStatus.ARCHIVED && dto.status !== RoomStatus.ACTIVE) {
       throw new BadRequestException({
         code: 'ROOM_ALREADY_ARCHIVED',
         message: 'Cannot update an archived room.',
@@ -233,10 +233,21 @@ export class RoomService {
       dto,
     );
 
+    if (updatedRoom.status === RoomStatus.ARCHIVED && room.status !== RoomStatus.ARCHIVED) {
+      this.eventEmitter.emit('room.archived', {
+        eventId: crypto.randomUUID(),
+        eventName: 'room.archived',
+        roomId,
+        occurredAt: new Date(),
+        payload: { roomId }
+      });
+    }
+
     return {
       id: updatedRoom.id,
       name: updatedRoom.name,
       description: updatedRoom.description,
+      status: updatedRoom.status,
       settings: {
         allowNegativeTreasury: settings?.allowNegativeTreasury,
         currencyCode: settings?.currencyCode,

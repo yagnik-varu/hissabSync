@@ -40,6 +40,11 @@ export class RoomMemberGuard implements CanActivate {
           userId: user.sub,
         },
       },
+      include: {
+        room: {
+          select: { status: true },
+        },
+      },
     });
 
     if (!membership) {
@@ -61,6 +66,7 @@ export class RoomMemberGuard implements CanActivate {
       id: membership.roomId,
       role: membership.role as Role,
       status: membership.status as MembershipStatus,
+      roomStatus: membership.room?.status,
     } as RoomContext;
 
     return true;

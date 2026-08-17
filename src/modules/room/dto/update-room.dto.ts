@@ -1,5 +1,6 @@
-import { IsString, IsOptional, IsBoolean, MaxLength } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, MaxLength, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { RoomStatus } from '../../../common/enums/room-status.enum';
 
 /**
  * Request body for PATCH /rooms/:roomId.
@@ -23,4 +24,9 @@ export class UpdateRoomDto {
   @IsBoolean()
   @IsOptional()
   allowNegativeTreasury?: boolean;
+
+  @ApiProperty({ required: false, enum: RoomStatus })
+  @IsEnum(RoomStatus)
+  @IsOptional()
+  status?: RoomStatus;
 }

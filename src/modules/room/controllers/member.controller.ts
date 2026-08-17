@@ -3,6 +3,7 @@ import { ThrottlerGuard, Throttle } from '@nestjs/throttler';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RoomMemberGuard } from '../../../common/guards/room-member.guard';
+import { RoomNotArchivedGuard } from '../../../common/guards/room-not-archived.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { Role } from '../../../common/enums/role.enum';
@@ -34,7 +35,7 @@ export class MemberController {
   }
 
   @Post('join')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RoomNotArchivedGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Join Room via Code' })
   async requestJoin(
@@ -63,7 +64,7 @@ export class MemberController {
   }
 
   @Patch(':roomId/join-requests/:requestId/approve')
-  @UseGuards(JwtAuthGuard, RoomMemberGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RoomMemberGuard, RolesGuard, RoomNotArchivedGuard)
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Approve Join Request' })
   async approveJoinRequest(
@@ -80,7 +81,7 @@ export class MemberController {
   }
 
   @Patch(':roomId/join-requests/:requestId/reject')
-  @UseGuards(JwtAuthGuard, RoomMemberGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RoomMemberGuard, RolesGuard, RoomNotArchivedGuard)
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Reject Join Request' })
   async rejectJoinRequest(
@@ -117,7 +118,7 @@ export class MemberController {
   }
 
   @Delete(':roomId/members/:userId')
-  @UseGuards(JwtAuthGuard, RoomMemberGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RoomMemberGuard, RolesGuard, RoomNotArchivedGuard)
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Remove / Kick Member' })
   async removeMember(
@@ -134,7 +135,7 @@ export class MemberController {
   }
 
   @Post(':roomId/leave-request')
-  @UseGuards(JwtAuthGuard, RoomMemberGuard)
+  @UseGuards(JwtAuthGuard, RoomMemberGuard, RoomNotArchivedGuard)
   @ApiOperation({ summary: 'Request Leave Room' })
   async requestLeave(
     @Param('roomId') roomId: string,
@@ -149,7 +150,7 @@ export class MemberController {
   }
 
   @Patch(':roomId/leave-requests/:requestId/approve')
-  @UseGuards(JwtAuthGuard, RoomMemberGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RoomMemberGuard, RolesGuard, RoomNotArchivedGuard)
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Approve Leave Request' })
   async approveLeaveRequest(
@@ -166,7 +167,7 @@ export class MemberController {
   }
 
   @Patch(':roomId/leave-requests/:requestId/reject')
-  @UseGuards(JwtAuthGuard, RoomMemberGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RoomMemberGuard, RolesGuard, RoomNotArchivedGuard)
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Reject Leave Request' })
   async rejectLeaveRequest(

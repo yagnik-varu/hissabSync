@@ -5,4 +5,5 @@ export interface RoomContext {
   id: string;
   role: Role;
   status: MembershipStatus;
+  roomStatus?: string; // added to support RoomNotArchivedGuard
 }

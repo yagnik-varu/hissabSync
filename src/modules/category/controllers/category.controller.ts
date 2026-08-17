@@ -4,6 +4,7 @@ import { CategoryService } from '../services/category.service';
 import { CreateCategoryDto } from '../dto/create-category.dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RoomMemberGuard } from '../../../common/guards/room-member.guard';
+import { RoomNotArchivedGuard } from '../../../common/guards/room-not-archived.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { Role } from '../../../common/enums/role.enum';
@@ -31,7 +32,7 @@ export class CategoryController {
   }
 
   @Post()
-  @UseGuards(RolesGuard)
+  @UseGuards(RolesGuard, RoomNotArchivedGuard)
   @Roles(Role.ADMIN, Role.ACCOUNTANT)
   @ApiOperation({ summary: 'Create a new expense category' })
   @ApiResponse({ status: 201, description: 'Category created' })
@@ -49,7 +50,7 @@ export class CategoryController {
   }
 
   @Delete(':categoryId')
-  @UseGuards(RolesGuard)
+  @UseGuards(RolesGuard, RoomNotArchivedGuard)
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Delete a category' })
   @ApiResponse({ status: 200, description: 'Category deleted' })

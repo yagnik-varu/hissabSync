@@ -4,9 +4,9 @@
 > **Update this file LAST, before ending every session/task.**
 > Keep it compact — status + facts only, no prose logs, no history of what
 > was tried and abandoned. If it grows past ~150 lines, prune finished
-> phases down to one line each (see Section 5).
+> phases down to one line each (see Section 7).
 
-Last updated: `2026-08-11` by `Antigravity (Room CRUD Endpoints)`
+Last updated: `2026-08-17` by `Antigravity (Production & Docs)`
 
 ---
 
@@ -14,40 +14,28 @@ Last updated: `2026-08-11` by `Antigravity (Room CRUD Endpoints)`
 
 Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 
-- [x] **Phase 1** — Project Foundation & Database Setup
-- [x] **Phase 2** — Authentication & Profile Module
-- [x] **Phase 3** — Room Lifecycle & RBAC Module
-- [x] **Phase 4** — Treasury Pool & Contribution Workflow
-- [x] **Phase 5** — Expense Tracking & Categories
-- [x] **Phase 6** — Reimbursement Payout Engine
-- [x] **Phase 7** — In-App Notifications & Audit Trail
-- [ ] **Phase 8** — Production Hardening, Testing & Documentation
+- [x] **Phase 1** — Project Foundation & Database Setup (Base setup, DB Schema, Seed Data, Swagger, ESLint, Global Filters/Pipes)
+- [x] **Phase 2** — Authentication & Profile Module (Full JWT lifecycle, rate limiting, profile management, e2e/unit tests)
+- [x] **Phase 3** — Room Lifecycle & RBAC Module (Room CRUD, memberships, join/leave requests, Role guards)
+- [x] **Phase 4** — Treasury Pool & Contribution Workflow (Immutable ledger, contribution flow, row-locking)
+- [x] **Phase 5** — Expense Tracking & Categories (Category CRUD, Expense workflow)
+- [x] **Phase 6** — Reimbursement Payout Engine (List/details and payout engine with strict/flexible modes)
+- [x] **Phase 7** — In-App Notifications & Audit Trail (Event listeners, timeline, audit logs)
+- [x] **Phase 8** — Production Hardening, Testing & Documentation (Multi-stage Docker, isolated DB networking, final deployments docs)
 
 ---
 
 ## 2. Current Focus
 
-**Active phase:** Phase 8
-**Doing right now:** Created production `docker/docker-compose.prod.yml` with securely isolated Postgres networking and environment variable injection.
+**Active phase:** V1 Complete
+**Doing right now:** V1 roadmap finished. Documentation generated and deployment finalized.
 **Blocked by:** None.
 
 ---
 
 ## 3. What's Actually Implemented (source of truth, not intentions)
 
-Only list what is DONE and working. Delete/move to Phase Status once a
-whole phase is finished — don't duplicate.
-
-| Module | Endpoints/features live | Notes |
-|---|---|---|
-| Phase 1 | Base setup, DB Schema, Seed Data, Swagger, ESLint, Global Filters/Pipes | Complete. Ready for Phase 2. |
-| Phase 2 | Authentication & Profile Module | Phase 2 done — full JWT lifecycle, `@nestjs/throttler` rate limiting, profile management, e2e and unit tests. See `src/modules/auth/`. |
-| Phase 3 | Room CRUD, memberships, shared enums, RBAC Guards | Complete. All room endpoints, RBAC pipelines (`RoomMemberGuard`, `RolesGuard`), join/leave requests, and role management are live. Unit and e2e tests implemented. Ready for Phase 4 (Treasury Module). |
-| Phase 4 | Treasury Pool & Contribution Workflow | Phase 4 done — `TreasuryTransaction` immutable ledger, Contribution workflow (Submit -> Approve/Reject/Cancel), manual adjustments, and row-locking logic. Ready for Phase 5. |
-| Phase 5 | Expense Tracking & Categories | Phase 5 done — Category CRUD, Expense workflow (Submit -> Approve/Reject/Cancel), Unit & e2e tests written. Ready for Phase 6. |
-| Phase 6 | Reimbursement Payout Engine | Phase 6 done — Reimbursement list/details, and the payout transaction engine with strict/flexible modes. Ready for Phase 7. |
-| Phase 7 | In-App Notifications & Audit Trail | Phase 7 done — Event listeners for Notification and Audit modules, `GET /notifications`, `GET /rooms/:roomId/activity`, `GET /rooms/:roomId/audit-logs`. Full E2E flow verified. Ready for Phase 8. |
-| Phase 8 | Production Hardening | Added production multi-stage `docker/Dockerfile` and `docker-compose.prod.yml` with isolated DB networking. |
+*(All phases complete — summaries moved to Section 1)*
 
 ---
 

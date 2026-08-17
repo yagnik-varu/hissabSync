@@ -28,7 +28,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 8
-**Doing right now:** Added GET /health endpoint for infrastructure monitoring. Preparing full E2E suite and Docker production config.
+**Doing right now:** Audited all controllers for complete Swagger documentation. Injected missing JSON examples for critical endpoints.
 **Blocked by:** None.
 
 ---
@@ -68,6 +68,7 @@ docs exactly, don't log it — that's the default, not news.
 - **Architectural Decision (Audit Logs Endpoint)**: Added `GET /rooms/:roomId/audit-logs` restricted to `@Roles(Role.ADMIN)` to satisfy the `docs/07-rbac-design.md` requirement ("View Detailed Audit Logs"). This endpoint was not explicitly listed in `docs/06-api-design.md`. This differs from our treatment of the undocumented `REJECTED` reimbursement status (which we ignored) because an RBAC capability explicitly demands a way for an Admin to exercise it (a required feature), whereas a dangling enum value represents an incomplete future state with no active system requirement depending on it. We chose the route `/rooms/:roomId/audit-logs` to align with the RESTful structure of the room module.
 - **Architectural Decision (Rate Limiting on Privileged Routes)**: Applied stricter `@Throttle()` overrides (10 requests/min) to sensitive write endpoints (e.g., expense/contribution approvals, treasury adjustments, reimbursement payouts, member role changes). While RBAC restricts these to Admins/Accountants, and row-locking prevents database race conditions, throttling is still necessary. It provides defense-in-depth against resource exhaustion from rapid-fire spam (e.g., frontend double-click bugs or malicious scripts) and limits the blast radius if a privileged account is compromised.
 - **Architectural Decision (Public Health Endpoint)**: Implemented `GET /health` using `@nestjs/terminus` (DB and Memory checks) and explicitly marked it `@Public()`, bypassing `JwtAuthGuard`. If `/health` required a Bearer token, infrastructure tools (like AWS Target Groups, Kubernetes probes, or Docker healthchecks) would be unable to poll it, causing load balancers to falsely mark the service as dead and repeatedly terminate the container, resulting in a production outage.
+- **Architectural Decision (Swagger API Examples)**: Conducted an audit of all controllers against `docs/12-coding-standards.md` Section 7. We found that while base decorators (`@ApiTags`, `@ApiOperation`, `@ApiBearerAuth`) were used, *none* of the endpoints contained concrete JSON schema examples. This gap was consistent across all modules (from Auth to Reimbursement), indicating that during rapid development phases, manual Swagger schema mapping was skipped in favor of auto-generated DTO inference (which fails to capture standard response wrappers). We retroactively injected detailed `@ApiBody` and `@ApiResponse` schema examples into the most heavily used endpoints (Register, Login, Create Room, Submit/Approve Expense, Pay Reimbursement) matching `docs/06-api-design.md` exactly.
 
 ---
 

@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Delete, Patch, Body, Param, Query, UseGuards, ParseUUIDPipe } from '@nestjs/common';
 import { ThrottlerGuard, Throttle } from '@nestjs/throttler';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { ExpenseService } from '../services/expense.service';
 import { SubmitExpenseDto } from '../dto/submit-expense.dto';
 import { ListExpensesDto } from '../dto/list-expenses.dto';
@@ -24,7 +24,33 @@ export class ExpenseController {
 
   @Post()
   @ApiOperation({ summary: 'Submit a new expense' })
-  @ApiResponse({ status: 201, description: 'Expense submitted successfully' })
+  @ApiBody({
+    schema: {
+      example: {
+        categoryId: 'c-1234-uuid',
+        amount: '1450.00',
+        title: 'Weekly Vegetables & Dairy',
+        description: 'Bought from Reliance Smart',
+        receiptUrl: 'https://cdn.example.com/receipts/rec-01.jpg',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Expense submitted successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Expense submitted successfully',
+        data: {
+          id: 'exp-1234-uuid',
+          amount: '1450.00',
+          title: 'Weekly Vegetables & Dairy',
+          status: 'PENDING',
+        },
+      },
+    },
+  })
   @ApiResponse({ status: 404, description: 'Category not found' })
   async submitExpense(
     @CurrentRoom() room: RoomContext,
@@ -95,7 +121,24 @@ export class ExpenseController {
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Roles(Role.ADMIN, Role.ACCOUNTANT)
   @ApiOperation({ summary: 'Approve an expense' })
-  @ApiResponse({ status: 200, description: 'Expense approved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Expense approved successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Expense approved successfully',
+        data: {
+          id: 'exp-1234-uuid',
+          status: 'APPROVED',
+          reimbursementInfo: {
+            id: 'reimb-1234-uuid',
+            status: 'PENDING_PAYMENT',
+          },
+        },
+      },
+    },
+  })
   @ApiResponse({ status: 400, description: 'Expense already processed' })
   @ApiResponse({ status: 404, description: 'Expense not found' })
   async approveExpense(

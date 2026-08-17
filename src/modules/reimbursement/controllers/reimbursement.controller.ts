@@ -57,7 +57,22 @@ export class ReimbursementController {
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Roles(Role.ADMIN, Role.ACCOUNTANT)
   @ApiOperation({ summary: 'Mark Reimbursement as Paid' })
-  @ApiResponse({ status: 200, description: 'Reimbursement marked as paid and treasury ledger debited' })
+  @ApiResponse({
+    status: 200,
+    description: 'Reimbursement marked as paid and treasury ledger debited',
+    schema: {
+      example: {
+        success: true,
+        message: 'Reimbursement marked as paid and treasury ledger debited',
+        data: {
+          id: 'reimb-1234-uuid',
+          status: 'PAID',
+          paidAt: '2026-08-08T12:30:00.000Z',
+          treasuryNewBalance: '6050.00',
+        },
+      },
+    },
+  })
   async payReimbursement(
     @CurrentRoom() room: RoomContext,
     @CurrentUser() user: UserPayload,

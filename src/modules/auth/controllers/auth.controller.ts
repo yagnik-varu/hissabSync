@@ -1,5 +1,5 @@
 import { Controller, Post, Get, Body, HttpCode, HttpStatus, UseGuards, Patch } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { ThrottlerGuard, Throttle } from '@nestjs/throttler';
 import { AuthService } from '../services/auth.service';
 import { RegisterDto } from '../dtos/register.dto';
@@ -20,8 +20,49 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(ThrottlerGuard)
   @ApiOperation({ summary: 'Register User' })
-  @ApiResponse({ status: HttpStatus.CREATED, description: 'User registered successfully' })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Validation error or email already exists' })
+  @ApiBody({
+    schema: {
+      example: {
+        fullName: 'Yagnik Varu',
+        email: 'yagnik@example.com',
+        password: 'StrongPassword123!',
+        phone: '+919876543210',
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'User registered successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'User registered successfully',
+        data: {
+          user: {
+            id: 'u-1234-uuid',
+            fullName: 'Yagnik Varu',
+            email: 'yagnik@example.com',
+          },
+          accessToken: 'eyJhbGciOi...',
+          refreshToken: 'eyJhbGciOi...',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Validation error or email already exists',
+    schema: {
+      example: {
+        success: false,
+        error: {
+          code: 'AUTH_EMAIL_IN_USE',
+          message: 'Email is already registered.',
+          details: [],
+        },
+      },
+    },
+  })
   async register(@Body() registerDto: RegisterDto) {
     const data = await this.authService.register(registerDto);
     return {
@@ -35,8 +76,42 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(ThrottlerGuard)
   @ApiOperation({ summary: 'Login User' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'User logged in successfully' })
-  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid email or password' })
+  @ApiBody({
+    schema: {
+      example: {
+        email: 'yagnik@example.com',
+        password: 'StrongPassword123!',
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'User logged in successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'User logged in successfully',
+        data: {
+          accessToken: 'eyJhbGciOi...',
+          refreshToken: 'eyJhbGciOi...',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid email or password',
+    schema: {
+      example: {
+        success: false,
+        error: {
+          code: 'AUTH_INVALID_CREDENTIALS',
+          message: 'Invalid email or password.',
+          details: [],
+        },
+      },
+    },
+  })
   async login(@Body() loginDto: LoginDto) {
     const data = await this.authService.login(loginDto);
     return {

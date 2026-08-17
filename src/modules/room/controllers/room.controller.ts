@@ -11,6 +11,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiBody,
 } from '@nestjs/swagger';
 import { RoomService } from '../services/room.service';
 import { CreateRoomDto } from '../dto/create-room.dto';
@@ -55,9 +56,39 @@ export class RoomController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new room' })
+  @ApiBody({
+    schema: {
+      example: {
+        name: 'Flat 402 Boys',
+        description: 'Shared apartment expense pool',
+        currencyCode: 'INR',
+        allowNegativeTreasury: false,
+      },
+    },
+  })
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: 'Room created successfully with generated roomCode',
+    schema: {
+      example: {
+        success: true,
+        message: 'Room created successfully',
+        data: {
+          id: 'r-1234-uuid',
+          name: 'Flat 402 Boys',
+          roomCode: 'FLAT402',
+          myRole: 'ADMIN',
+          memberCount: 1,
+          treasuryBalance: '0.00',
+          pendingExpensesCount: 0,
+          pendingContributionsCount: 0,
+          settings: {
+            allowNegativeTreasury: false,
+            currencyCode: 'INR',
+          },
+        },
+      },
+    },
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,

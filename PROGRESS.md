@@ -28,7 +28,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 8
-**Doing right now:** Audited all controllers for complete Swagger documentation. Injected missing JSON examples for critical endpoints.
+**Doing right now:** Wrote comprehensive cross-module E2E test suites validating business journeys, RBAC, and admin safeguards.
 **Blocked by:** None.
 
 ---
@@ -74,7 +74,10 @@ docs exactly, don't log it — that's the default, not news.
 
 ## 5. Known Issues / TODO Debt
 
-*(none)*
+- **Archive Room Gap**: Discovered during E2E hardening that the "Archive Room" status transition was never implemented in prior phases. `UpdateRoomDto` lacks a `status` field, and no financial guards or services (`TreasuryService`, `ExpenseService`) check if `room.status === ARCHIVED` to freeze transactions. This happens because phase-by-phase development treats modules in isolation. This remains an open gap for a future sprint.
+- The `REJECTED` status exists in the `ReimbursementStatus` enum but there is no endpoint/logic to actually reject a reimbursement once auto-generated.
+- No soft-deletion for users/rooms yet (hard-deletes are avoided, but soft-deletion cascades aren't fully mapped).
+- No frontend exists; purely REST API right now.
 
 ---
 

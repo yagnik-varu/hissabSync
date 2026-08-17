@@ -132,7 +132,7 @@ describe('RoomController Multi-Tenant Isolation (e2e)', () => {
   });
 
   describe('ROOM_MEMBER_NOT_ACTIVE check', () => {
-    beforeAll(async () => {
+    it('User B should be blocked from accessing Room A because their status is LEFT', async () => {
       // Manually add User B to Room A as a LEFT member
       await prisma.roomMember.create({
         data: {
@@ -143,9 +143,7 @@ describe('RoomController Multi-Tenant Isolation (e2e)', () => {
           leftAt: new Date(),
         },
       });
-    });
 
-    it('User B should be blocked from accessing Room A because their status is LEFT', async () => {
       const res = await request(app.getHttpServer())
         .get(`/rooms/${roomIdA}`)
         .set('Authorization', `Bearer ${tokenB}`)

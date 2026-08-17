@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, UseGuards, Query } from '@nestjs/common';
+import { ThrottlerGuard, Throttle } from '@nestjs/throttler';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { TreasuryService } from '../services/treasury.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
@@ -52,6 +53,8 @@ export class TreasuryController {
   }
 
   @Post('adjustments')
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Create a manual treasury adjustment (Admin only)' })
   @ApiResponse({ status: 201, description: 'Adjustment created successfully' })

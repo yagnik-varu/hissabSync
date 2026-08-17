@@ -1,4 +1,5 @@
 import { Controller, Post, Get, Delete, Patch, Body, Param, Query, UseGuards, ParseUUIDPipe } from '@nestjs/common';
+import { ThrottlerGuard, Throttle } from '@nestjs/throttler';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { TreasuryService } from '../services/treasury.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
@@ -73,6 +74,8 @@ export class ContributionController {
   }
 
   @Patch(':id/approve')
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Roles(Role.ADMIN, Role.ACCOUNTANT)
   @ApiOperation({ summary: 'Approve a pending contribution' })
   @ApiResponse({ status: 200, description: 'Contribution approved successfully' })
@@ -90,6 +93,8 @@ export class ContributionController {
   }
 
   @Patch(':id/reject')
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Roles(Role.ADMIN, Role.ACCOUNTANT)
   @ApiOperation({ summary: 'Reject a pending contribution' })
   @ApiResponse({ status: 200, description: 'Contribution rejected successfully' })

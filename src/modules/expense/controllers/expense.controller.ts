@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Delete, Patch, Body, Param, Query, UseGuards, ParseUUIDPipe } from '@nestjs/common';
+import { ThrottlerGuard, Throttle } from '@nestjs/throttler';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ExpenseService } from '../services/expense.service';
 import { SubmitExpenseDto } from '../dto/submit-expense.dto';
@@ -90,7 +91,8 @@ export class ExpenseController {
   }
 
   @Patch(':id/approve')
-  @UseGuards(RolesGuard)
+  @UseGuards(RolesGuard, ThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Roles(Role.ADMIN, Role.ACCOUNTANT)
   @ApiOperation({ summary: 'Approve an expense' })
   @ApiResponse({ status: 200, description: 'Expense approved successfully' })
@@ -110,7 +112,8 @@ export class ExpenseController {
   }
 
   @Patch(':id/reject')
-  @UseGuards(RolesGuard)
+  @UseGuards(RolesGuard, ThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Roles(Role.ADMIN, Role.ACCOUNTANT)
   @ApiOperation({ summary: 'Reject an expense' })
   @ApiResponse({ status: 200, description: 'Expense rejected successfully' })

@@ -1,4 +1,5 @@
 import { Controller, Get, Patch, Param, Query, UseGuards, ParseUUIDPipe } from '@nestjs/common';
+import { ThrottlerGuard, Throttle } from '@nestjs/throttler';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ReimbursementService } from '../services/reimbursement.service';
 import { ListReimbursementsDto } from '../dtos/list-reimbursements.dto';
@@ -52,6 +53,8 @@ export class ReimbursementController {
   }
 
   @Patch(':id/pay')
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Roles(Role.ADMIN, Role.ACCOUNTANT)
   @ApiOperation({ summary: 'Mark Reimbursement as Paid' })
   @ApiResponse({ status: 200, description: 'Reimbursement marked as paid and treasury ledger debited' })

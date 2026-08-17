@@ -28,7 +28,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 8
-**Doing right now:** Preparing for Phase 8: rate limiting beyond auth, health checks, full E2E suite, Docker production config, and documentation.
+**Doing right now:** Extended rate limiting to sensitive write operations (financial approvals, treasury adjustments, role changes).
 **Blocked by:** None.
 
 ---
@@ -66,6 +66,7 @@ docs exactly, don't log it — that's the default, not news.
 - **Full E2E Walkthrough Insight (Phases 4-6)**: Successfully verified the full end-to-end flow via a Node.js test script hitting the live API. The script confirmed that the Strict Mode correctly blocks `TREASURY_INSUFFICIENT_BALANCE` and succeeds after a top-up contribution. **Key Finding**: Because `expense.approved` triggers Reimbursement creation asynchronously (`{ async: true }` in `@OnEvent`), there is a minor race condition where querying `GET /reimbursements` immediately (within ms) after approving an expense might return empty. Frontends must either poll, rely on WebSockets/Notifications, or allow a minor delay. Unit tests would not have caught this as they typically mock the event emitter synchronously.
 - **Architectural Decision (Audit Timeline)**: Sourced `GET /rooms/:roomId/activity` from `AuditLog` since it inherently acts as a chronological timeline of domain events. To prevent leaking admin-only details to standard members, the `AuditService` explicitly strips raw `metadata` when querying the activity feed, returning only safe fields (like `amount`).
 - **Architectural Decision (Audit Logs Endpoint)**: Added `GET /rooms/:roomId/audit-logs` restricted to `@Roles(Role.ADMIN)` to satisfy the `docs/07-rbac-design.md` requirement ("View Detailed Audit Logs"). This endpoint was not explicitly listed in `docs/06-api-design.md`. This differs from our treatment of the undocumented `REJECTED` reimbursement status (which we ignored) because an RBAC capability explicitly demands a way for an Admin to exercise it (a required feature), whereas a dangling enum value represents an incomplete future state with no active system requirement depending on it. We chose the route `/rooms/:roomId/audit-logs` to align with the RESTful structure of the room module.
+- **Architectural Decision (Rate Limiting on Privileged Routes)**: Applied stricter `@Throttle()` overrides (10 requests/min) to sensitive write endpoints (e.g., expense/contribution approvals, treasury adjustments, reimbursement payouts, member role changes). While RBAC restricts these to Admins/Accountants, and row-locking prevents database race conditions, throttling is still necessary. It provides defense-in-depth against resource exhaustion from rapid-fire spam (e.g., frontend double-click bugs or malicious scripts) and limits the blast radius if a privileged account is compromised.
 
 ---
 

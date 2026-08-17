@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { ThrottlerGuard, Throttle } from '@nestjs/throttler';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RoomMemberGuard } from '../../../common/guards/room-member.guard';
@@ -97,7 +98,8 @@ export class MemberController {
   }
 
   @Patch(':roomId/members/:userId/role')
-  @UseGuards(JwtAuthGuard, RoomMemberGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RoomMemberGuard, RolesGuard, ThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Change Member Role' })
   async updateMemberRole(

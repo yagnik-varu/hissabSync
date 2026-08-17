@@ -28,7 +28,7 @@ Mirrors `docs/10-implementation-roadmap.md`. Mark each box `[ ]` `[~]` `[x]`.
 ## 2. Current Focus
 
 **Active phase:** Phase 8
-**Doing right now:** Wrote comprehensive cross-module E2E test suites validating business journeys, RBAC, and admin safeguards.
+**Doing right now:** Created production multi-stage `docker/Dockerfile` per `docs/11-repository-structure.md` with Prisma client generation and healthchecks.
 **Blocked by:** None.
 
 ---
@@ -47,6 +47,7 @@ whole phase is finished — don't duplicate.
 | Phase 5 | Expense Tracking & Categories | Phase 5 done — Category CRUD, Expense workflow (Submit -> Approve/Reject/Cancel), Unit & e2e tests written. Ready for Phase 6. |
 | Phase 6 | Reimbursement Payout Engine | Phase 6 done — Reimbursement list/details, and the payout transaction engine with strict/flexible modes. Ready for Phase 7. |
 | Phase 7 | In-App Notifications & Audit Trail | Phase 7 done — Event listeners for Notification and Audit modules, `GET /notifications`, `GET /rooms/:roomId/activity`, `GET /rooms/:roomId/audit-logs`. Full E2E flow verified. Ready for Phase 8. |
+| Phase 8 | Production Hardening | Added production multi-stage `docker/Dockerfile` with healthcheck and Prisma generation. |
 
 ---
 
